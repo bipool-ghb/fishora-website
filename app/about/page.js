@@ -1,5 +1,5 @@
 'use client'
-import Image from 'next/image'
+import { imgSrc } from '@/lib/imgSrc'
 
 const ACCENT = '#0D7C66'
 
@@ -28,12 +28,10 @@ export default function AboutPage() {
     <div>
       {/* Hero */}
       <section style={{ position: 'relative', overflow: 'hidden', minHeight: 320, background: '#000' }}>
-        <Image
-          src="/images/cover-photo.jpeg"
+        <img
+          src={imgSrc('/images/cover-photo.jpeg')}
           alt="Fishora team"
-          fill
-          style={{ objectFit: 'cover', opacity: 0.45 }}
-          priority
+          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, opacity: 0.45 }}
         />
         <div style={{
           position: 'relative', zIndex: 2,
@@ -65,11 +63,10 @@ export default function AboutPage() {
             </p>
           </div>
           <div style={{ borderRadius: 16, overflow: 'hidden' }}>
-            <Image
-              src="/images/cover-photo-bd.png"
+            <img
+              src={imgSrc('/images/cover-photo-bd.png')}
               alt="Fresh fish market"
-              width={500} height={320}
-              style={{ width: '100%', height: 320, objectFit: 'cover' }}
+              style={{ width: '100%', height: 320, objectFit: 'cover', display: 'block' }}
             />
           </div>
         </div>

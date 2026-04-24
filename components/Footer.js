@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
+import { imgSrc } from '@/lib/imgSrc'
 
 const ACCENT = '#0D7C66'
 
@@ -10,7 +10,7 @@ export default function Footer() {
       <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 32 }}>
         {/* Brand */}
         <div>
-          <Image src="/images/Fishora-logo.jpeg" alt="Fishora" width={130} height={50} style={{ borderRadius: 8, objectFit: 'contain', marginBottom: 12 }} />
+          <img src={imgSrc('/images/Fishora-logo.jpeg')} alt="Fishora" style={{ height: 50, borderRadius: 8, marginBottom: 12 }} />
           <p style={{ fontSize: 14, lineHeight: 1.6, color: '#999' }}>
             Fresh Halal fish, meat & eggs delivered to your door. Quality you can trust.
           </p>
