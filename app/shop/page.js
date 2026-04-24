@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import ProductCard from '@/components/ProductCard'
@@ -7,17 +7,17 @@ import { CATEGORIES, PRODUCTS } from '@/data/products'
 
 const ACCENT = '#0D7C66'
 
-export default function ShopPage() {
+function ShopContent() {
   const { addToCart } = useCart()
   const searchParams = useSearchParams()
   const [activeCat, setActiveCat] = useState(() => searchParams.get('cat') || 'all')
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('default')
 
   useEffect(() => {
     const cat = searchParams.get('cat')
     if (cat) setActiveCat(cat)
   }, [searchParams])
-  const [search, setSearch] = useState('')
-  const [sort, setSort] = useState('default')
 
   const filtered = useMemo(() => {
     let items = PRODUCTS
@@ -92,5 +92,13 @@ export default function ShopPage() {
         <div style={{ textAlign: 'center', padding: 60, color: '#999' }}>No products found / কোনো পণ্য পাওয়া যায়নি</div>
       )}
     </div>
+  )
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 60, textAlign: 'center', color: '#999' }}>Loading...</div>}>
+      <ShopContent />
+    </Suspense>
   )
 }
