@@ -20,8 +20,9 @@ const VALUES = [
 const TEAM = [
   { name: 'Zulfiquer Rhaman', role: 'Founder', emoji: '👨‍💼' },
   { name: 'Md. Mahfujul Islam', role: 'Founder & CEO', emoji: '👨‍💼' },
-  { name: 'Nasrin Parvin', role: 'Board of Advisor', emoji: '👩‍💼' },
   { name: 'Md Mashrukur Rahman', role: 'Head of Operation', emoji: '👨‍💼' },
+  { name: 'Fariha Sultana', role: 'Board of Advisor', emoji: '👩‍💼' },
+  { name: 'Nasrin Parvin', role: 'Board of Advisor', emoji: '👩‍💼' },
   { name: 'Khatune Jannat Mim', role: 'Operation Manager', emoji: '👩‍💼' },
   
 ]
