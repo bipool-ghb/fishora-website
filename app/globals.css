@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --accent: #0D7C66;
+  --accent-light: rgba(13,124,102,0.08);
+  --accent-mid:   rgba(13,124,102,0.15);
+  --bg: #f9fafb;
+  --surface: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #444444;
+  --text-muted: #888888;
+  --border: #e0e0e0;
+  --border-light: #f0f0f0;
+  --footer-bg: #1a1a1a;
+  --whatsapp: #25D366;
+  --cat-fish:   #1976D2;
+  --cat-meat:   #C62828;
+  --cat-eggs:   #F9A825;
+  --cat-prawns: #E65100;
+  --cat-dried:  #6D4C41;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+a { text-decoration: none; }
+
+@media (max-width: 768px) {
+  .nav-desktop { display: none !important; }
+  .nav-hamburger { display: block !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-menu { display: none !important; }
+}

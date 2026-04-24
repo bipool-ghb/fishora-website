@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fishora — Fresh Halal Fish, Meat & Eggs</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: #f9fafb; color: #1a1a1a; -webkit-font-smoothing: antialiased; }
+    ::selection { background: #0D7C6640; }
+    input:focus, textarea:focus, select:focus { outline: 2px solid #0D7C66; outline-offset: -1px; }
+    @media (max-width: 768px) {
+      .nav-desktop { display: none !important; }
+      .nav-hamburger { display: block !important; }
+    }
+    @media (min-width: 769px) {
+      .nav-mobile-menu { display: none !important; }
+    }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="pages.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useCallback, useEffect } = React;
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accentColor": "#0D7C66",
+      "heroStyle": "overlay",
+      "cardStyle": "minimal",
+      "brandTheme": "teal"
+    }/*EDITMODE-END*/;
+
+    function App() {
+      const tweaks = useTweaks(TWEAK_DEFAULTS);
+      const [page, setPage] = useState('home');
+      const [cart, setCart] = useState([]);
+
+      const addToCart = useCallback((product, qty) => {
+        setCart(prev => {
+          const existing = prev.find(i => i.product.id === product.id);
+          if (existing) return prev.map(i => i.product.id === product.id ? { ...i, qty: i.qty + qty } : i);
+          return [...prev, { product, qty }];
+        });
+      }, []);
+
+      const updateQty = useCallback((id, qty) => {
+        if (qty <= 0) return setCart(prev => prev.filter(i => i.product.id !== id));
+        setCart(prev => prev.map(i => i.product.id === id ? { ...i, qty } : i));
+      }, []);
+
+      const removeItem = useCallback((id) => {
+        setCart(prev => prev.filter(i => i.product.id !== id));
+      }, []);
+
+      // Expose addToCart globally for home page featured products
+      window.__addToCart = addToCart;
+
+      const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+      // Scroll to top on page change
+      useEffect(() => { window.scrollTo(0, 0); }, [page]);
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <Navbar page={page} setPage={setPage} cartCount={cartCount} tweaks={tweaks} />
+
+          <main style={{ flex: 1 }}>
+            {page === 'home' && <HomePage setPage={setPage} tweaks={tweaks} />}
+            {page === 'shop' && <ShopPage addToCart={addToCart} tweaks={tweaks} />}
+            {page === 'cart' && <CartPage cart={cart} updateQty={updateQty} removeItem={removeItem} setPage={setPage} tweaks={tweaks} />}
+            {page === 'checkout' && <CheckoutPage cart={cart} tweaks={tweaks} setPage={setPage} />}
+            {page === 'about' && <AboutPage tweaks={tweaks} />}
+            {page === 'delivery' && <DeliveryPage tweaks={tweaks} />}
+            {page === 'services' && <ServicesPage tweaks={tweaks} setPage={setPage} />}
+            {page === 'contact' && <ContactPage tweaks={tweaks} />}
+          </main>
+
+          <Footer setPage={setPage} tweaks={tweaks} />
+          <WhatsAppButton />
+
+          <TweaksPanel title="Fishora Tweaks">
+            <TweakRadio label="Brand Color" options={['teal', 'ocean', 'forest', 'coral', 'royal']} value={tweaks.brandTheme} onChange={v => {
+              const colors = { teal: '#0D7C66', ocean: '#1565C0', forest: '#2E7D32', coral: '#D84315', royal: '#5E35B1' };
+              tweaks.set('brandTheme', v);
+              tweaks.set('accentColor', colors[v]);
+            }} />
+            <TweakColor label="Custom Color" value={tweaks.accentColor} onChange={v => tweaks.set('accentColor', v)} />
+            <TweakRadio label="Hero Style" options={['overlay', 'split']} value={tweaks.heroStyle} onChange={v => tweaks.set('heroStyle', v)} />
+            <TweakRadio label="Card Style" options={['minimal', 'shadow', 'bordered', 'rounded']} value={tweaks.cardStyle} onChange={v => tweaks.set('cardStyle', v)} />
+          </TweaksPanel>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
