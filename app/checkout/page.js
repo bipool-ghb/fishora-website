@@ -41,7 +41,25 @@ export default function CheckoutPage() {
   function handlePlaceOrder() {
     const e = validate()
     if (Object.keys(e).length > 0) { setErrors(e); return }
-    setOrderId(generateOrderId())
+    const id = generateOrderId()
+    setOrderId(id)
+    // Save order to localStorage for tracking
+    const order = {
+      id,
+      name: form.name,
+      phone: form.phone,
+      address: form.address,
+      deliveryDate: form.deliveryDate,
+      payment,
+      total: subtotal + deliveryFee,
+      status: 'order_placed',
+      placedAt: new Date().toISOString(),
+      items: cart.map(i => ({ name: i.product.name, qty: i.qty, price: i.product.price })),
+    }
+    try {
+      const existing = JSON.parse(localStorage.getItem('fishora_orders') || '[]')
+      localStorage.setItem('fishora_orders', JSON.stringify([order, ...existing]))
+    } catch {}
     clearCart()
     setPlaced(true)
   }
@@ -122,6 +140,10 @@ export default function CheckoutPage() {
           background: ACCENT, color: '#fff', borderRadius: 10,
           padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
         }}>Back to Home</Link>
+        <Link href={`/track`} style={{
+          background: '#1a1a1a', color: '#fff', borderRadius: 10,
+          padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
+        }}>📦 Track Order</Link>
         <a href={`https://wa.me/8801357187246?text=Hi! My order ID is ${orderId}. I'd like to track my order.`}
           target="_blank" rel="noopener noreferrer" style={{
           background: '#25D366', color: '#fff', borderRadius: 10,

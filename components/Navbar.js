@@ -13,6 +13,7 @@ const LINKS = [
   { href: '/delivery',  label: 'Delivery' },
   { href: '/services',  label: 'Services' },
   { href: '/contact',   label: 'Contact'  },
+  { href: '/track',     label: 'Track Order' },
 ]
 
 export default function Navbar() {
