@@ -1,36 +1,50 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const ACCENT = '#0D7C66'
 
 const STAGES = [
-  { key: 'order_placed',      label: 'Order Placed',      labelBn: 'অর্ডার গৃহীত',         icon: '📋' },
-  { key: 'payment_complete',  label: 'Payment Complete',  labelBn: 'পেমেন্ট সম্পন্ন',       icon: '💳' },
-  { key: 'order_confirmed',   label: 'Order Confirmed',   labelBn: 'অর্ডার নিশ্চিত',        icon: '✅' },
-  { key: 'order_processing',  label: 'Order Processing',  labelBn: 'প্রক্রিয়াজাতকরণ',       icon: '🔪' },
-  { key: 'delivery_started',  label: 'Delivery Started',  labelBn: 'ডেলিভারি শুরু',          icon: '🚚' },
-  { key: 'delivered',         label: 'Delivered',         labelBn: 'ডেলিভারি সম্পন্ন',      icon: '🎉' },
+  { key: 'order_placed',      label: 'Order Placed',      labelBn: 'অর্ডার গৃহীত',       icon: '📋' },
+  { key: 'payment_complete',  label: 'Payment Complete',  labelBn: 'পেমেন্ট সম্পন্ন',     icon: '💳' },
+  { key: 'order_confirmed',   label: 'Order Confirmed',   labelBn: 'অর্ডার নিশ্চিত',      icon: '✅' },
+  { key: 'order_processing',  label: 'Order Processing',  labelBn: 'প্রক্রিয়াজাতকরণ',     icon: '🔪' },
+  { key: 'delivery_started',  label: 'Delivery Started',  labelBn: 'ডেলিভারি শুরু',        icon: '🚚' },
+  { key: 'delivered',         label: 'Delivered',         labelBn: 'ডেলিভারি সম্পন্ন',    icon: '🎉' },
 ]
 
 const STATUS_INDEX = Object.fromEntries(STAGES.map((s, i) => [s.key, i]))
 
-export default function TrackPage() {
-  const [input, setInput]     = useState('')
-  const [order, setOrder]     = useState(null)
+function findOrder(orders, id) {
+  return orders.find(o => o.id === id.trim().toUpperCase()) || null
+}
+
+function TrackContent() {
+  const searchParams = useSearchParams()
+  const [input, setInput]       = useState('')
+  const [order, setOrder]       = useState(null)
   const [notFound, setNotFound] = useState(false)
-  const [orders, setOrders]   = useState([])
+  const [orders, setOrders]     = useState([])
 
   useEffect(() => {
-    try {
-      setOrders(JSON.parse(localStorage.getItem('fishora_orders') || '[]'))
-    } catch {}
-  }, [])
+    let saved = []
+    try { saved = JSON.parse(localStorage.getItem('fishora_orders') || '[]') } catch {}
+    setOrders(saved)
+
+    // Auto-search if ?id= is in the URL
+    const urlId = searchParams.get('id')
+    if (urlId) {
+      setInput(urlId)
+      const found = findOrder(saved, urlId)
+      if (found) setOrder(found)
+      else setNotFound(true)
+    }
+  }, [searchParams])
 
   function handleSearch(e) {
     e.preventDefault()
-    const q = input.trim().toUpperCase()
-    const found = orders.find(o => o.id === q)
+    const found = findOrder(orders, input)
     if (found) { setOrder(found); setNotFound(false) }
     else        { setOrder(null); setNotFound(true) }
   }
@@ -43,13 +57,13 @@ export default function TrackPage() {
       <p style={{ color: '#888', fontSize: 15, marginBottom: 32 }}>আপনার অর্ডার ট্র্যাক করুন</p>
 
       {/* Search */}
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10, marginBottom: 36 }}>
+      <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
         <input
           value={input}
-          onChange={e => { setInput(e.target.value); setNotFound(false) }}
+          onChange={e => { setInput(e.target.value); setNotFound(false); setOrder(null) }}
           placeholder="Enter Order ID — e.g. FSH-ABCD-1234"
           style={{
-            flex: 1, padding: '12px 16px', border: '1.5px solid #e0e0e0',
+            flex: 1, padding: '12px 16px', border: `1.5px solid ${notFound ? '#ef4444' : '#e0e0e0'}`,
             borderRadius: 10, fontSize: 15, fontFamily: 'monospace',
           }}
         />
@@ -60,15 +74,19 @@ export default function TrackPage() {
       </form>
 
       {notFound && (
-        <div style={{ background: '#fff3f3', border: '1.5px solid #ffcdd2', borderRadius: 12, padding: '16px 20px', marginBottom: 24, color: '#c62828', fontSize: 14 }}>
-          ❌ Order not found. Please check your Order ID and try again.
+        <div style={{ background: '#fff3f3', border: '1.5px solid #ffcdd2', borderRadius: 12, padding: '16px 20px', marginBottom: 24, fontSize: 14 }}>
+          <strong style={{ color: '#c62828' }}>Order not found.</strong>
+          <span style={{ color: '#888', marginLeft: 6 }}>
+            Orders are saved on this device. If you placed the order on a different device or browser, please{' '}
+            <a href="https://wa.me/8801357187246" target="_blank" rel="noopener noreferrer" style={{ color: ACCENT, fontWeight: 600 }}>contact us on WhatsApp</a>.
+          </span>
         </div>
       )}
 
       {order && (
         <div>
-          {/* Order summary */}
-          <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: 24, marginBottom: 28 }}>
+          {/* Summary card */}
+          <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: 24, marginBottom: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
               <div>
                 <div style={{ fontSize: 12, color: '#888', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Order ID</div>
@@ -82,9 +100,7 @@ export default function TrackPage() {
                 {STAGES[activeIdx]?.icon} {STAGES[activeIdx]?.label}
               </div>
             </div>
-
             <hr style={{ border: 'none', borderTop: '1px solid #f0f0f0', margin: '16px 0' }} />
-
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, fontSize: 14 }}>
               <div><span style={{ color: '#888' }}>Customer</span><br /><strong>{order.name}</strong></div>
               <div><span style={{ color: '#888' }}>Phone</span><br /><strong>{order.phone}</strong></div>
@@ -94,61 +110,51 @@ export default function TrackPage() {
           </div>
 
           {/* Timeline */}
-          <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: '28px 24px' }}>
+          <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: '28px 24px', marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 28 }}>Order Timeline</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {STAGES.map((stage, i) => {
-                const done    = i < activeIdx
-                const current = i === activeIdx
-                const pending = i > activeIdx
-                const isLast  = i === STAGES.length - 1
-
-                return (
-                  <div key={stage.key} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                    {/* Dot + line */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                      <div style={{
-                        width: 40, height: 40, borderRadius: 20,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: current ? 20 : 18,
-                        background: done ? ACCENT : current ? ACCENT : '#f0f0f0',
-                        border: current ? `3px solid ${ACCENT}40` : 'none',
-                        boxShadow: current ? `0 0 0 4px ${ACCENT}20` : 'none',
-                        transition: 'all .3s',
-                        filter: pending ? 'grayscale(1) opacity(0.4)' : 'none',
-                      }}>
+            {STAGES.map((stage, i) => {
+              const done    = i < activeIdx
+              const current = i === activeIdx
+              const pending = i > activeIdx
+              const isLast  = i === STAGES.length - 1
+              return (
+                <div key={stage.key} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 20,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: current ? 20 : 18,
+                      background: done || current ? ACCENT : '#f0f0f0',
+                      boxShadow: current ? `0 0 0 5px ${ACCENT}25` : 'none',
+                      filter: pending ? 'grayscale(1) opacity(0.35)' : 'none',
+                      transition: 'all .3s',
+                    }}>
+                      <span style={{ filter: done || current ? 'none' : 'grayscale(1)' }}>
                         {done ? '✓' : stage.icon}
-                      </div>
-                      {!isLast && (
-                        <div style={{
-                          width: 2, flex: 1, minHeight: 28,
-                          background: done ? ACCENT : '#e0e0e0',
-                          margin: '4px 0',
-                        }} />
-                      )}
+                      </span>
                     </div>
-
-                    {/* Label */}
-                    <div style={{ paddingBottom: isLast ? 0 : 28, paddingTop: 8 }}>
-                      <div style={{
-                        fontSize: 15, fontWeight: current ? 700 : 600,
-                        color: pending ? '#bbb' : '#1a1a1a',
-                      }}>{stage.label}</div>
-                      <div style={{ fontSize: 12, color: pending ? '#ccc' : '#888', marginTop: 2 }}>
-                        {stage.labelBn}
-                        {current && <span style={{ marginLeft: 8, color: ACCENT, fontWeight: 600 }}>← Current status</span>}
-                        {done    && <span style={{ marginLeft: 8, color: ACCENT }}>✓ Completed</span>}
-                      </div>
+                    {!isLast && (
+                      <div style={{ width: 2, minHeight: 28, flex: 1, background: done ? ACCENT : '#e8e8e8', margin: '4px 0' }} />
+                    )}
+                  </div>
+                  <div style={{ paddingBottom: isLast ? 0 : 28, paddingTop: 8 }}>
+                    <div style={{ fontSize: 15, fontWeight: current ? 700 : 600, color: pending ? '#bbb' : '#1a1a1a' }}>
+                      {stage.label}
+                      {current && <span style={{ marginLeft: 8, fontSize: 12, background: ACCENT, color: '#fff', borderRadius: 12, padding: '2px 10px' }}>Now</span>}
+                    </div>
+                    <div style={{ fontSize: 12, color: pending ? '#ccc' : '#999', marginTop: 3 }}>
+                      {stage.labelBn}
+                      {done && <span style={{ marginLeft: 8, color: ACCENT }}>✓ Done</span>}
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
 
           {/* Items */}
           {order.items?.length > 0 && (
-            <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: 24, marginTop: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 14, border: '1.5px solid #eee', padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Items Ordered</h3>
               {order.items.map((item, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#555', marginBottom: 8 }}>
@@ -159,7 +165,7 @@ export default function TrackPage() {
             </div>
           )}
 
-          <div style={{ marginTop: 24, textAlign: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
             <a href={`https://wa.me/8801357187246?text=Hi! My order ID is ${order.id}. Can you update me on my order status?`}
               target="_blank" rel="noopener noreferrer" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -170,33 +176,39 @@ export default function TrackPage() {
         </div>
       )}
 
-      {/* Recent orders shortcut */}
+      {/* Recent orders */}
       {!order && orders.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <p style={{ fontSize: 13, color: '#888', marginBottom: 12 }}>Your recent orders:</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {orders.slice(0, 3).map(o => (
-              <button key={o.id} onClick={() => { setInput(o.id); setOrder(o); setNotFound(false) }}
-                style={{
-                  background: '#fff', border: '1.5px solid #eee', borderRadius: 10,
-                  padding: '12px 16px', textAlign: 'left', cursor: 'pointer',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: ACCENT }}>{o.id}</span>
-                <span style={{ fontSize: 13, color: '#888' }}>{new Date(o.placedAt).toLocaleDateString()} · ৳{o.total}</span>
-              </button>
-            ))}
-          </div>
+        <div style={{ marginTop: 16 }}>
+          <p style={{ fontSize: 13, color: '#888', marginBottom: 10 }}>Your recent orders on this device:</p>
+          {orders.slice(0, 3).map(o => (
+            <button key={o.id} onClick={() => { setInput(o.id); setOrder(o); setNotFound(false) }}
+              style={{
+                width: '100%', background: '#fff', border: '1.5px solid #eee', borderRadius: 10,
+                padding: '12px 16px', textAlign: 'left', cursor: 'pointer', marginBottom: 8,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+              <span style={{ fontFamily: 'monospace', fontWeight: 700, color: ACCENT }}>{o.id}</span>
+              <span style={{ fontSize: 13, color: '#888' }}>{new Date(o.placedAt).toLocaleDateString()} · ৳{o.total}</span>
+            </button>
+          ))}
         </div>
       )}
 
-      {orders.length === 0 && !order && (
+      {orders.length === 0 && !order && !notFound && (
         <div style={{ textAlign: 'center', padding: '40px 0', color: '#bbb' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
-          <p>No orders placed yet.</p>
+          <p style={{ marginBottom: 12 }}>No orders found on this device.</p>
           <Link href="/shop" style={{ color: ACCENT, fontWeight: 600, fontSize: 14 }}>Start Shopping →</Link>
         </div>
       )}
     </div>
+  )
+}
+
+export default function TrackPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 60, textAlign: 'center', color: '#999' }}>Loading...</div>}>
+      <TrackContent />
+    </Suspense>
   )
 }

@@ -140,7 +140,7 @@ export default function CheckoutPage() {
           background: ACCENT, color: '#fff', borderRadius: 10,
           padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
         }}>Back to Home</Link>
-        <Link href={`/track`} style={{
+        <Link href={`/track?id=${orderId}`} style={{
           background: '#1a1a1a', color: '#fff', borderRadius: 10,
           padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
         }}>📦 Track Order</Link>
