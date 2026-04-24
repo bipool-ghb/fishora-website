@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 
@@ -32,7 +33,7 @@ export default function Navbar() {
       }}>
         {/* Logo */}
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/images/Fishora-logo.jpeg" alt="Fishora" style={{ height: 44, borderRadius: 8 }} />
+          <Image src="/images/Fishora-logo.jpeg" alt="Fishora" width={120} height={44} style={{ borderRadius: 8, objectFit: 'contain' }} />
         </Link>
 
         {/* Desktop links */}

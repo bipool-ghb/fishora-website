@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useCart } from '@/context/CartContext'
 import ProductCard from '@/components/ProductCard'
 import { CATEGORIES, PRODUCTS } from '@/data/products'
@@ -30,10 +31,12 @@ export default function HomePage() {
     <div>
       {/* ── Hero ── */}
       <section style={{ position: 'relative', overflow: 'hidden', minHeight: 480, background: '#000' }}>
-        <img
+        <Image
           src="/images/hero-fish.png"
           alt="Fresh fish on ice"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, opacity: 0.5 }}
+          fill
+          style={{ objectFit: 'cover', opacity: 0.5 }}
+          priority
         />
         <div style={{
           position: 'relative', zIndex: 2,
