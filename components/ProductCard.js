@@ -1,98 +1,85 @@
 'use client'
 import { useState } from 'react'
-import { CATEGORIES } from '@/data/products'
+import { Badge, StarRating } from './ui'
 
-const ACCENT = '#0D7C66'
-const DEAL_COLOR = '#0D7C66'
+const badgeVariants = {
+  Premium: 'premium', Popular: 'popular', Fresh: 'fresh',
+  Value: 'value', Organic: 'organic', Halal: 'halal', 'Best Value': 'premium'
+}
 
 export default function ProductCard({ product, onAdd }) {
-  const [qty, setQty] = useState(1)
-  const [hover, setHover] = useState(false)
-  const cat = CATEGORIES.find(c => c.id === product.cat)
-  const isDeal = product.cat === 'deals'
+  const [hov, setHov] = useState(false)
+  const [added, setAdded] = useState(false)
+
+  const handleAdd = (e) => {
+    e.stopPropagation()
+    onAdd && onAdd(product)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1200)
+  }
 
   return (
     <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        background: '#fff',
-        borderRadius: 12,
-        border: isDeal ? `1.5px solid ${DEAL_COLOR}30` : '1px solid #f0f0f0',
-        boxShadow: hover ? '0 6px 24px rgba(0,0,0,0.1)' : '0 1px 4px rgba(0,0,0,0.04)',
-        overflow: 'hidden', display: 'flex', flexDirection: 'column',
-        transform: hover ? 'translateY(-2px)' : 'none',
-        transition: 'transform .2s, box-shadow .2s',
+        background: 'var(--f-surface)', borderRadius: 'var(--f-radius-lg)', overflow: 'hidden',
+        boxShadow: hov ? 'var(--f-card-shadow-hover)' : 'var(--f-card-shadow)',
+        transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+        transform: hov ? 'translateY(-6px)' : 'none',
+        border: '1px solid var(--f-border)', cursor: 'pointer',
       }}
     >
-      {/* Image / icon area */}
+      {/* Image */}
       <div style={{
-        height: isDeal ? 100 : 160,
-        background: isDeal ? `linear-gradient(135deg, ${DEAL_COLOR}18, ${DEAL_COLOR}08)` : (cat?.color || '#666') + '10',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: isDeal ? 44 : 48, position: 'relative',
-        borderBottom: isDeal ? `1px dashed ${DEAL_COLOR}30` : 'none',
+        position: 'relative', overflow: 'hidden', height: 210,
+        background: 'linear-gradient(135deg, var(--f-bg-dark), var(--f-ocean-mid))',
       }}>
-        {cat?.icon}
-        {product.badge && (
-          <span style={{
-            position: 'absolute', top: 10, right: 10,
-            background: isDeal ? '#FF6B35' : ACCENT,
-            color: '#fff', fontSize: 11, fontWeight: 700,
-            padding: '3px 10px', borderRadius: 20,
-          }}>{product.badge}</span>
-        )}
-        {isDeal && (
-          <span style={{
-            position: 'absolute', top: 10, left: 10,
-            background: DEAL_COLOR, color: '#fff', fontSize: 10, fontWeight: 700,
-            padding: '3px 8px', borderRadius: 20, letterSpacing: 0.5,
-          }}>COMBO</span>
+        <img src={product.image} alt={product.name} loading="lazy" style={{
+          width: '100%', height: '100%', objectFit: 'cover',
+          transition: 'transform 0.6s cubic-bezier(0.16,1,0.3,1)',
+          transform: hov ? 'scale(1.07)' : 'scale(1)',
+        }} onError={e => { e.target.style.display = 'none' }} />
+        <div style={{ position: 'absolute', top: 12, left: 12 }}>
+          <Badge text={product.badge} variant={badgeVariants[product.badge] || 'default'} />
+        </div>
+        {product.freshness && (
+          <div style={{
+            position: 'absolute', top: 12, right: 12,
+            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
+            borderRadius: 'var(--f-radius-full)', padding: '4px 10px',
+            fontSize: 11, color: '#fff', fontWeight: 600,
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2ecc71' }}></span>
+            {product.freshness}
+          </div>
         )}
       </div>
 
-      <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 12, color: cat?.color || '#666', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-          {cat?.name}
+      {/* Content */}
+      <div style={{ padding: '16px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--f-text)', marginBottom: 2 }}>{product.name}</h3>
+            <span style={{ fontFamily: 'var(--f-font-bn)', fontSize: 13, color: 'var(--f-text-muted)' }}>{product.nameBn}</span>
+          </div>
+          {product.rating && <StarRating rating={product.rating} size={11} />}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 2 }}>{product.name}</div>
-        <div style={{ fontSize: 13, color: '#888', marginBottom: isDeal ? 10 : 0 }}>{product.nameBn}</div>
-
-        {/* Combo items list */}
-        {isDeal && product.includes && (
-          <ul style={{ margin: '0 0 4px', padding: 0, listStyle: 'none' }}>
-            {product.includes.map((item, i) => (
-              <li key={i} style={{ fontSize: 12, color: '#555', lineHeight: 1.9, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ color: DEAL_COLOR, fontWeight: 700, fontSize: 14 }}>✓</span> {item}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div style={{ marginTop: 'auto', paddingTop: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
-            <span style={{ fontSize: 20, fontWeight: 700, color: ACCENT }}>৳{product.price}</span>
-            {product.originalPrice && (
-              <span style={{ fontSize: 14, color: '#bbb', textDecoration: 'line-through' }}>৳{product.originalPrice}</span>
-            )}
-            <span style={{ fontSize: 13, color: '#999' }}>/{product.unit}</span>
-          </div>
-
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-              <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ width: 32, height: 32, border: 'none', background: '#f5f5f5', fontSize: 16 }}>−</button>
-              <span style={{ width: 32, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>{qty}</span>
-              <button onClick={() => setQty(qty + 1)} style={{ width: 32, height: 32, border: 'none', background: '#f5f5f5', fontSize: 16 }}>+</button>
-            </div>
-            <button
-              onClick={() => { onAdd(product, qty); setQty(1) }}
-              style={{ flex: 1, background: ACCENT, color: '#fff', border: 'none', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 13, transition: 'opacity .2s' }}
-              onMouseEnter={e => e.target.style.opacity = '0.85'}
-              onMouseLeave={e => e.target.style.opacity = '1'}
-            >
-              Add to Cart
-            </button>
-          </div>
+        <p style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{product.weight} · {product.source}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
+          <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-text)' }}>৳{product.price.toLocaleString()}</span>
+          <button onClick={handleAdd} style={{
+            width: 38, height: 38, borderRadius: '50%',
+            background: added ? '#2ecc71' : 'var(--f-aqua)', color: '#fff', border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 20, fontWeight: 400, cursor: 'pointer',
+            transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+            transform: hov && !added ? 'scale(1.12)' : 'scale(1)',
+            boxShadow: '0 4px 12px rgba(46,125,50,0.3)',
+          }}>
+            {added ? '✓' : '+'}
+          </button>
         </div>
       </div>
     </div>

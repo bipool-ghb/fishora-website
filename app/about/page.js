@@ -1,129 +1,43 @@
 'use client'
-import { imgSrc } from '@/lib/imgSrc'
-
-const ACCENT = '#0D7C66'
-
-const STATS = [
-  { value: '500+', label: 'Happy Customers', labelBn: 'সন্তুষ্ট গ্রাহক' },
-  { value: '50+', label: 'Products Available', labelBn: 'পণ্যের বিস্তার' },
-  { value: '5+', label: 'Years Experience', labelBn: 'বছরের অভিজ্ঞতা' },
-  { value: '100%', label: 'Halal Certified', labelBn: 'হালাল সার্টিফাইড' },
-]
-
-const VALUES = [
-  { icon: '🐟', title: 'Freshness First', titleBn: 'তাজা পণ্য সর্বদা', desc: 'We source directly from local fishermen and farms daily to ensure the freshest products reach your table.' },
-  { icon: '✅', title: 'Halal Guaranteed', titleBn: 'হালাল নিশ্চিত', desc: 'Every product we sell is 100% halal — from sourcing to processing to delivery, we uphold Islamic standards.' },
-  { icon: '🤝', title: 'Community First', titleBn: 'সম্প্রদায়ের জন্য', desc: 'Based in Ishwardi, Pabna, we are proud to serve our local community and support local farmers and fishermen.' },
-  { icon: '🚚', title: 'Reliable Delivery', titleBn: 'নির্ভরযোগ্য ডেলিভারি', desc: 'We deliver across Bangladesh with careful cold-chain handling so your order arrives fresh, on time, every time.' },
-]
-
-const TEAM = [
-  { name: 'Zulfiquer Rhaman', role: 'Founder', emoji: '👨‍💼' },
-  { name: 'Md. Mahfujul Islam', role: 'Founder & CEO', emoji: '👨‍💼' },
-  { name: 'Md Mashrukur Rahman', role: 'Head of Operation', emoji: '👨‍💼' },
-  { name: 'Fariha Sultana', role: 'Board of Advisor', emoji: '👩‍💼' },
-  { name: 'Nasrin Parvin', role: 'Board of Advisor', emoji: '👩‍💼' },
-  { name: 'Khatune Jannat Mim', role: 'Operation Manager', emoji: '👩‍💼' },
-  
-]
+import { Reveal, Badge, FButton } from '@/components/ui'
 
 export default function AboutPage() {
   return (
-    <div>
-      {/* Hero */}
-      <section style={{ position: 'relative', overflow: 'hidden', minHeight: 320, background: '#000' }}>
-        <img
-          src={imgSrc('/images/cover-photo.jpeg')}
-          alt="Fishora team"
-          style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0, opacity: 0.45 }}
-        />
-        <div style={{
-          position: 'relative', zIndex: 2,
-          maxWidth: 1200, margin: '0 auto', padding: '80px 24px',
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 320,
-        }}>
-          <h1 style={{ color: '#fff', fontSize: 44, fontWeight: 800, lineHeight: 1.2, margin: 0, maxWidth: 600 }}>
-            About Fishora
+    <div style={{ paddingTop: 100, minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: 800, paddingBottom: 80 }}>
+        <Reveal>
+          <Badge text="Our Story" variant="premium" style={{ marginBottom: 16 }} />
+          <h1 style={{ fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, color: 'var(--f-text)', letterSpacing: '-0.04em', marginBottom: 16, lineHeight: 1.08 }}>
+            From River to<br/>Your <span style={{ color: 'var(--f-aqua)' }}>Table</span>
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, marginTop: 14, maxWidth: 520, lineHeight: 1.6 }}>
-            আমাদের সম্পর্কে — ঈশ্বরদী থেকে সারাদেশে তাজা হালাল মাছ, মাংস ও ডিম।
+          <p style={{ fontFamily: 'var(--f-font-bn)', fontSize: 16, color: 'var(--f-text-muted)', marginBottom: 32 }}>
+            নদী থেকে আপনার টেবিলে
           </p>
-        </div>
-      </section>
-
-      {/* Story */}
-      <section style={{ maxWidth: 900, margin: '0 auto', padding: '64px 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: 28, fontWeight: 700, color: '#1a1a1a', marginBottom: 16 }}>Our Story</h2>
-            <p style={{ fontSize: 16, lineHeight: 1.8, color: '#444', marginBottom: 14 }}>
-              Fishora was born in Ishwardi, Pabna — a region renowned for its rich rivers, fertile farmlands, and vibrant fish markets. We started with a simple mission: to bring the freshest, most authentic halal protein directly to Bangladeshi families.
-            </p>
-            <p style={{ fontSize: 15, lineHeight: 1.8, color: '#666', marginBottom: 14 }}>
-              ফিশোরার যাত্রা শুরু হয়েছিল ঈশ্বরদী, পাবনায় — একটি অঞ্চল যা তার নদী, কৃষি এবং মৎস্য বাজারের জন্য বিখ্যাত। আমরা বিশ্বাস করি যে তাজা, হালাল খাবার প্রতিটি পরিবারের অধিকার।
-            </p>
-            <p style={{ fontSize: 15, lineHeight: 1.8, color: '#666' }}>
-              Today, we serve hundreds of families, restaurants, and businesses across Bangladesh — with the same commitment to quality, freshness, and trust that we started with.
-            </p>
+        </Reveal>
+        <Reveal delay={150}>
+          <div style={{
+            borderRadius: 'var(--f-radius-xl)', overflow: 'hidden', marginBottom: 48,
+            aspectRatio: '16/7', background: 'linear-gradient(135deg, #0B1D3A, #0A3D62)',
+          }}>
+            <img src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80"
+              alt="Fresh market" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }}
+              onError={e => e.target.style.display = 'none'} />
           </div>
-          <div style={{ borderRadius: 16, overflow: 'hidden' }}>
-            <img
-              src={imgSrc('/images/cover-photo-bd.png')}
-              alt="Fresh fish market"
-              style={{ width: '100%', height: 320, objectFit: 'cover', display: 'block' }}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section style={{ background: ACCENT, padding: '56px 24px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
-          {STATS.map((s, i) => (
-            <div key={i} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 40, fontWeight: 800, color: '#fff', marginBottom: 6 }}>{s.value}</div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>{s.label}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>{s.labelBn}</div>
+        </Reveal>
+        {[
+          { title: 'Why We Started', text: "Fishora was born from a simple frustration — why is it so hard to get truly fresh fish in Bangladesh's cities? We set out to build a technology-enabled supply chain that brings river-fresh food to urban families within hours, not days." },
+          { title: 'Our Mission', text: "To make premium-quality fresh food accessible to every family in Bangladesh. We believe freshness shouldn't be a luxury — it should be the standard." },
+          { title: 'Quality Commitment', text: 'Every product passes through our 7-point quality check. From sourcing to delivery, temperature is monitored in real-time. We maintain strict cold chain logistics to ensure your food arrives as fresh as when it left the water.' },
+          { title: 'Sustainable Sourcing', text: 'We partner directly with local fishermen and farmers, ensuring fair prices and sustainable practices. Our partnerships support over 500 farming families across Bangladesh.' },
+        ].map((s, i) => (
+          <Reveal key={i} delay={i * 80}>
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--f-text)', marginBottom: 12, letterSpacing: '-0.02em' }}>{s.title}</h2>
+              <p style={{ fontSize: 16, color: 'var(--f-text-secondary)', lineHeight: 1.8 }}>{s.text}</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Values */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '64px 24px' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>Our Values</h2>
-        <p style={{ textAlign: 'center', color: '#888', marginBottom: 40, fontSize: 15 }}>আমাদের মূল্যবোধ</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
-          {VALUES.map((v, i) => (
-            <div key={i} style={{
-              background: '#fff', borderRadius: 14, border: '1.5px solid #eee',
-              padding: 28, borderTop: `3px solid ${ACCENT}`,
-            }}>
-              <div style={{ fontSize: 36, marginBottom: 14 }}>{v.icon}</div>
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{v.title}</div>
-              <div style={{ fontSize: 13, color: ACCENT, fontWeight: 600, marginBottom: 12 }}>{v.titleBn}</div>
-              <p style={{ fontSize: 14, color: '#666', lineHeight: 1.7, margin: 0 }}>{v.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Team */}
-      <section style={{ background: '#f9fafb', padding: '64px 24px' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', fontSize: 28, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>Meet the Team</h2>
-          <p style={{ textAlign: 'center', color: '#888', marginBottom: 40, fontSize: 15 }}>আমাদের দল</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
-            {TEAM.map((m, i) => (
-              <div key={i} style={{ background: '#fff', borderRadius: 14, border: '1px solid #eee', padding: 28, textAlign: 'center' }}>
-                <div style={{ fontSize: 56, marginBottom: 14 }}>{m.emoji}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 4 }}>{m.name}</div>
-                <div style={{ fontSize: 13, color: ACCENT, fontWeight: 500 }}>{m.role}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          </Reveal>
+        ))}
+      </div>
     </div>
   )
 }

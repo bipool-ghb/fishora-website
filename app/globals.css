@@ -1,41 +1,134 @@
 @import "tailwindcss";
 
+/* ============================================
+   FISHORA — Design System v2
+   Brand: Green #2E7D32, Blue #1565C0, Gold #F9A825
+   ============================================ */
+
 :root {
-  --accent: #0D7C66;
-  --accent-light: rgba(13,124,102,0.08);
-  --accent-mid:   rgba(13,124,102,0.15);
-  --bg: #f9fafb;
-  --surface: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #444444;
-  --text-muted: #888888;
-  --border: #e0e0e0;
-  --border-light: #f0f0f0;
-  --footer-bg: #1a1a1a;
-  --whatsapp: #25D366;
-  --cat-fish:   #1976D2;
-  --cat-meat:   #C62828;
-  --cat-eggs:   #F9A825;
-  --cat-prawns: #E65100;
-  --cat-dried:  #6D4C41;
+  --f-font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --f-font-bn: 'Noto Sans Bengali', sans-serif;
+
+  /* Backgrounds */
+  --f-bg: #FAFBFC;
+  --f-bg-alt: #F0F3F7;
+  --f-bg-dark: #0B1D3A;
+  --f-bg-darker: #071223;
+  --f-surface: #FFFFFF;
+  --f-surface-hover: #F5F7FA;
+
+  /* Text */
+  --f-text: #0B1D3A;
+  --f-text-secondary: #4A5568;
+  --f-text-muted: #8E9AAB;
+
+  /* Borders */
+  --f-border: #E2E8F0;
+
+  /* Brand colors */
+  --f-ocean: #0B1D3A;
+  --f-ocean-mid: #0A3D62;
+  --f-aqua: #2E7D32;
+  --f-aqua-light: rgba(46, 125, 50, 0.1);
+  --f-aqua-glow: rgba(46, 125, 50, 0.3);
+  --f-gold: #F9A825;
+  --f-gold-light: rgba(249, 168, 37, 0.1);
+  --f-red: #E74C3C;
+  --f-blue: #1565C0;
+  --f-whatsapp: #25D366;
+
+  /* Radii */
+  --f-radius-sm: 8px;
+  --f-radius-md: 12px;
+  --f-radius-lg: 20px;
+  --f-radius-xl: 28px;
+  --f-radius-full: 9999px;
+
+  /* Shadows */
+  --f-card-shadow: 0 4px 24px rgba(11, 29, 58, 0.06);
+  --f-card-shadow-hover: 0 12px 40px rgba(11, 29, 58, 0.12);
+  --f-btn-shadow: 0 4px 14px rgba(46, 125, 50, 0.2);
+  --f-btn-shadow-hover: 0 8px 28px rgba(46, 125, 50, 0.35);
+
+  /* Navbar */
+  --f-nav-bg: rgba(255, 255, 255, 0.85);
+  --f-nav-blur: blur(20px);
+}
+
+[data-theme="dark"] {
+  --f-bg: #0A0E17;
+  --f-bg-alt: #111827;
+  --f-surface: #1A2332;
+  --f-surface-hover: #243044;
+  --f-text: #F1F5F9;
+  --f-text-secondary: #94A3B8;
+  --f-text-muted: #64748B;
+  --f-border: #1E293B;
+  --f-nav-bg: rgba(10, 14, 23, 0.85);
+  --f-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  --f-card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+
 body {
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text-primary);
+  font-family: var(--f-font);
+  background: var(--f-bg);
+  color: var(--f-text);
   line-height: 1.6;
+  transition: background 0.3s ease, color 0.3s ease;
 }
+
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
-a { text-decoration: none; }
+a { text-decoration: none; color: inherit; }
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
 @media (max-width: 768px) {
+  .container { padding: 0 16px; }
   .nav-desktop { display: none !important; }
   .nav-hamburger { display: block !important; }
+  .grid-2col { grid-template-columns: 1fr !important; }
+  .hero-grid { grid-template-columns: 1fr !important; }
+  .hero-image { display: none !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  body { padding-bottom: 72px; }
 }
+
 @media (min-width: 769px) {
   .nav-mobile-menu { display: none !important; }
+  .mobile-bottom-nav { display: none !important; }
 }
+
+/* Animations */
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
+
+@keyframes bubbleUp {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-30px) scale(1.2); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--f-bg-alt); }
+::-webkit-scrollbar-thumb { background: var(--f-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--f-text-muted); }

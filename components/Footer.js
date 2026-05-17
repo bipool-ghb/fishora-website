@@ -1,60 +1,89 @@
 'use client'
 import Link from 'next/link'
-import { imgSrc } from '@/lib/imgSrc'
-
-const ACCENT = '#0D7C66'
+import { FishoraLogo, NakshiPattern } from './ui'
+import { LOCATION, PHONE, WHATSAPP, HOURS } from '@/data/products'
 
 export default function Footer() {
   return (
-    <footer style={{ background: '#1a1a1a', color: '#ccc', padding: '48px 20px 24px', marginTop: 60 }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 32 }}>
-        {/* Brand */}
-        <div>
-          <img src={imgSrc('/images/Fishora-logo.jpeg')} alt="Fishora" style={{ height: 50, borderRadius: 8, marginBottom: 12 }} />
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#999' }}>
-            Fresh Halal fish, meat & eggs delivered to your door. Quality you can trust.
-          </p>
-          <p style={{ fontSize: 13, color: '#777', marginTop: 8 }}>তাজা হালাল মাছ, মাংস ও ডিম — আপনার দোরগোড়ায়।</p>
-        </div>
+    <footer style={{
+      background: 'var(--f-bg-dark)', color: '#fff', padding: '80px 0 40px',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      <NakshiPattern color="#2E7D32" size={400} opacity={0.015} style={{ top: -80, right: -100, transform: 'rotate(20deg)' }} />
+      <div className="container" style={{ position: 'relative' }}>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 48,
+          marginBottom: 48,
+        }}>
+          {/* Brand */}
+          <div>
+            <FishoraLogo light size="lg" />
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginTop: 16, lineHeight: 1.7, maxWidth: 260 }}>
+              Fresh halal fish, meat & eggs delivered to your door. Quality you can trust.
+            </p>
+            <p style={{ fontFamily: 'var(--f-font-bn)', fontSize: 13, color: 'rgba(255,255,255,0.3)', marginTop: 12 }}>
+              তাজা হালাল মাছ, মাংস ও ডিম — আপনার দোরগোড়ায়।
+            </p>
+          </div>
 
-        {/* Quick Links */}
-        <div>
-          <h4 style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Quick Links</h4>
-          {[['/', 'Home'], ['/shop', 'Shop'], ['/about', 'About'], ['/delivery', 'Delivery'], ['/contact', 'Contact']].map(([href, label]) => (
-            <div key={href}>
-              <Link href={href} style={{ color: '#999', fontSize: 14, lineHeight: 2.2, display: 'block', transition: 'color .2s' }}
-                onMouseEnter={e => e.target.style.color = ACCENT}
-                onMouseLeave={e => e.target.style.color = '#999'}
-              >
-                {label}
-              </Link>
+          {/* Shop links */}
+          <div>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>Shop</h4>
+            {['Fresh Fish', 'Halal Meat', 'Eggs', 'Prawns', 'Combo Deals'].map(l => (
+              <Link key={l} href="/shop" style={{
+                display: 'block', color: 'rgba(255,255,255,0.6)',
+                fontSize: 14, padding: '6px 0', transition: 'color 0.2s', textDecoration: 'none',
+              }}>{l}</Link>
+            ))}
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>Company</h4>
+            {[['About Us', '/about'], ['Contact', '/contact'], ['Services', '/services']].map(([l, p]) => (
+              <Link key={l} href={p} style={{
+                display: 'block', color: 'rgba(255,255,255,0.6)',
+                fontSize: 14, padding: '6px 0', transition: 'color 0.2s', textDecoration: 'none',
+              }}>{l}</Link>
+            ))}
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>Contact</h4>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 2.2 }}>
+              <div>📍 {LOCATION}</div>
+              <div>📞 {PHONE}</div>
+              <div>💬 <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" style={{ color: '#66BB6A', textDecoration: 'none' }}>WhatsApp: {PHONE}</a></div>
+              <div>🕐 {HOURS}</div>
             </div>
-          ))}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+              {['bKash', 'Nagad', 'COD', 'Bank'].map(m => (
+                <span key={m} style={{
+                  padding: '5px 12px', borderRadius: 'var(--f-radius-full)',
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  fontSize: 12, color: 'rgba(255,255,255,0.5)',
+                }}>{m}</span>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Contact */}
-        <div>
-          <h4 style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Contact</h4>
-          <p style={{ fontSize: 14, lineHeight: 1.9, color: '#999' }}>
-            📍 Bishwas Super Market, College Road,<br />Ishwardi, Pabna<br />
-            📞 01357-187246<br />
-            💬 WhatsApp: 01357-187246
-          </p>
-        </div>
-
-        {/* Payment */}
-        <div>
-          <h4 style={{ color: '#fff', fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Payment Methods</h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {[['bKash', '#E2136E'], ['Nagad', '#F6921E'], ['COD', '#666'], ['Bank', '#1565C0']].map(([m, c]) => (
-              <span key={m} style={{ background: '#2a2a2a', border: `1px solid ${c}30`, padding: '6px 12px', borderRadius: 6, fontSize: 13, color: '#bbb' }}>{m}</span>
+        {/* Bottom */}
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          flexWrap: 'wrap', gap: 16,
+        }}>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
+            © 2026 Fishora — Fresh Inside. All rights reserved.
+          </span>
+          <div style={{ display: 'flex', gap: 16 }}>
+            {['Privacy', 'Terms', 'Support'].map(l => (
+              <span key={l} style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', cursor: 'pointer' }}>{l}</span>
             ))}
           </div>
         </div>
-      </div>
-
-      <div style={{ maxWidth: 1200, margin: '32px auto 0', paddingTop: 20, borderTop: '1px solid #333', textAlign: 'center', fontSize: 13, color: '#666' }}>
-        © 2026 Fishora — Fresh Inside. All rights reserved.
       </div>
     </footer>
   )

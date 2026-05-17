@@ -1,278 +1,248 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { QRCodeSVG } from 'qrcode.react'
 import { useCart } from '@/context/CartContext'
-
-function generateOrderId() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  const segment = (n) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-  return `FSH-${segment(4)}-${segment(4)}`
-}
-
-const ACCENT = '#0D7C66'
-const PAYMENTS = [
-  { id: 'bkash', label: 'bKash',            color: '#E2136E' },
-  { id: 'nagad', label: 'Nagad',            color: '#F6921E' },
-  { id: 'cod',   label: 'Cash on Delivery', color: '#555555' },
-  { id: 'bank',  label: 'Bank Transfer',    color: '#1565C0' },
-]
-
-const today = new Date().toISOString().split('T')[0]
+import FIcon from '@/components/FIcon'
+import { Reveal, FButton } from '@/components/ui'
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart } = useCart()
+  const [step, setStep] = useState(0)
+  const [address, setAddress] = useState({ name: '', phone: '', street: '', area: '', city: 'Ishwardi' })
+  const [deliverySlot, setDeliverySlot] = useState('morning')
   const [payment, setPayment] = useState('bkash')
-  const [placed, setPlaced]   = useState(false)
-  const [orderId, setOrderId] = useState('')
-  const [errors, setErrors]   = useState({})
-  const [form, setForm]       = useState({ name: '', phone: '', address: '', deliveryDate: '' })
-  const deliveryFee = subtotal > 2000 ? 0 : 100
+  const [orderPlaced, setOrderPlaced] = useState(false)
 
-  function validate() {
-    const e = {}
-    if (!form.name.trim())         e.name = 'Name is required'
-    if (!form.phone.trim())        e.phone = 'Phone number is required'
-    if (!form.address.trim())      e.address = 'Delivery address is required'
-    if (!form.deliveryDate)        e.deliveryDate = 'Please select a delivery date'
-    return e
+  const fmt = (v) => `৳${v.toLocaleString()}`
+
+  const slots = [
+    { id: 'morning', label: 'Morning', time: '8:00 AM – 12:00 PM' },
+    { id: 'afternoon', label: 'Afternoon', time: '12:00 PM – 4:00 PM' },
+    { id: 'evening', label: 'Evening', time: '4:00 PM – 8:00 PM' },
+  ]
+  const payments = [
+    { id: 'bkash', label: 'bKash', color: '#E2136E' },
+    { id: 'nagad', label: 'Nagad', color: '#F6921E' },
+    { id: 'card', label: 'Card', color: '#1A73E8' },
+    { id: 'cod', label: 'Cash on Delivery', color: '#27ae60' },
+  ]
+
+  const inputStyle = {
+    width: '100%', padding: '14px 16px', borderRadius: 'var(--f-radius-md)',
+    border: '1.5px solid var(--f-border)', background: 'var(--f-surface)',
+    color: 'var(--f-text)', fontSize: 15, outline: 'none',
+    transition: 'border-color 0.2s',
   }
 
-  function handlePlaceOrder() {
-    const e = validate()
-    if (Object.keys(e).length > 0) { setErrors(e); return }
-    const id = generateOrderId()
-    setOrderId(id)
-    // Save order to localStorage for tracking
-    const order = {
-      id,
-      name: form.name,
-      phone: form.phone,
-      address: form.address,
-      deliveryDate: form.deliveryDate,
-      payment,
-      total: subtotal + deliveryFee,
-      status: 'order_placed',
-      placedAt: new Date().toISOString(),
-      items: cart.map(i => ({ name: i.product.name, qty: i.qty, price: i.product.price })),
-    }
-    try {
-      const existing = JSON.parse(localStorage.getItem('fishora_orders') || '[]')
-      localStorage.setItem('fishora_orders', JSON.stringify([order, ...existing]))
-    } catch {}
-    clearCart()
-    setPlaced(true)
+  if (orderPlaced) {
+    return (
+      <div style={{ paddingTop: 120, minHeight: '100vh' }}>
+        <div className="container" style={{ maxWidth: 560, textAlign: 'center', padding: '60px 24px' }}>
+          <Reveal>
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%', background: 'rgba(46,204,113,0.1)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
+            }}>
+              <FIcon name="check" size={40} color="#27ae60" />
+            </div>
+            <h1 style={{ fontSize: 32, fontWeight: 800, color: 'var(--f-text)', marginBottom: 12 }}>Order Placed!</h1>
+            <p style={{ fontSize: 16, color: 'var(--f-text-secondary)', marginBottom: 8, lineHeight: 1.7 }}>
+              Your fresh food is being prepared. You&apos;ll receive a confirmation shortly.
+            </p>
+            <p style={{ fontFamily: 'var(--f-font-bn)', fontSize: 15, color: 'var(--f-aqua)', marginBottom: 32 }}>
+              ধন্যবাদ! আপনার অর্ডার গৃহীত হয়েছে।
+            </p>
+            <Link href="/" style={{ textDecoration: 'none' }}>
+              <FButton variant="primary" size="lg">Back to Home</FButton>
+            </Link>
+          </Reveal>
+        </div>
+      </div>
+    )
   }
 
-  function field(key, value) {
-    setForm(f => ({ ...f, [key]: value }))
-    if (errors[key]) setErrors(e => ({ ...e, [key]: undefined }))
+  if (cart.length === 0) {
+    return (
+      <div style={{ paddingTop: 120, minHeight: '100vh' }}>
+        <div className="container" style={{ maxWidth: 560, textAlign: 'center', padding: '60px 24px' }}>
+          <FIcon name="cart" size={48} color="var(--f-border)" />
+          <p style={{ marginTop: 16, fontSize: 17, fontWeight: 600, color: 'var(--f-text)' }}>Your cart is empty</p>
+          <Link href="/shop" style={{ textDecoration: 'none', marginTop: 20, display: 'inline-block' }}>
+            <FButton variant="primary" size="lg">Go Shopping</FButton>
+          </Link>
+        </div>
+      </div>
+    )
   }
-
-  if (placed) return (
-    <div style={{ maxWidth: 560, margin: '0 auto', padding: '60px 20px', textAlign: 'center' }}>
-      <div style={{ fontSize: 56, marginBottom: 12 }}>✅</div>
-      <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6, color: '#1a1a1a' }}>Order Placed!</h2>
-      <p style={{ color: '#666', fontSize: 15, marginBottom: 2 }}>আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে।</p>
-      <p style={{ color: '#888', fontSize: 13, marginBottom: 28 }}>
-        Delivery on <strong>{form.deliveryDate}</strong> · We'll confirm via WhatsApp.
-      </p>
-
-      {/* Order ID Card */}
-      <div style={{
-        background: '#fff', borderRadius: 16, border: '1.5px solid #eee',
-        padding: '28px 24px', marginBottom: 24,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-      }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: '#888', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
-          Your Order ID
-        </p>
-        <div style={{
-          display: 'inline-block', background: '#f4f6f9', borderRadius: 10,
-          padding: '10px 24px', marginBottom: 20,
-        }}>
-          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: 3, color: ACCENT, fontFamily: 'monospace' }}>
-            {orderId}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <div style={{ padding: 12, background: '#fff', border: '1.5px solid #eee', borderRadius: 12, display: 'inline-block' }}>
-            <QRCodeSVG
-              value={`FISHORA-ORDER:${orderId}|NAME:${form.name}|PHONE:${form.phone}|DATE:${form.deliveryDate}|TOTAL:${subtotal + deliveryFee}`}
-              size={160}
-              fgColor="#1a1a1a"
-              bgColor="#ffffff"
-              level="M"
-            />
-          </div>
-        </div>
-
-        <p style={{ fontSize: 12, color: '#aaa', margin: 0 }}>
-          Save this QR code or note your Order ID to track your order
-        </p>
-        <p style={{ fontSize: 12, color: '#bbb', marginTop: 4 }}>
-          এই QR কোড বা অর্ডার ID সংরক্ষণ করুন
-        </p>
-      </div>
-
-      {/* Order Summary */}
-      <div style={{
-        background: ACCENT + '08', borderRadius: 12, padding: '16px 20px',
-        fontSize: 14, color: '#555', marginBottom: 24, textAlign: 'left',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span>Customer</span><strong>{form.name}</strong>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span>Phone</span><strong>{form.phone}</strong>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span>Delivery Date</span><strong>{form.deliveryDate}</strong>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>Total Paid</span><strong style={{ color: ACCENT }}>৳{subtotal + deliveryFee}</strong>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link href="/" style={{
-          background: ACCENT, color: '#fff', borderRadius: 10,
-          padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
-        }}>Back to Home</Link>
-        <Link href={`/track?id=${orderId}`} style={{
-          background: '#1a1a1a', color: '#fff', borderRadius: 10,
-          padding: '12px 28px', fontSize: 15, fontWeight: 600, display: 'inline-block',
-        }}>📦 Track Order</Link>
-        <a href={`https://wa.me/8801357187246?text=Hi! My order ID is ${orderId}. I'd like to track my order.`}
-          target="_blank" rel="noopener noreferrer" style={{
-          background: '#25D366', color: '#fff', borderRadius: 10,
-          padding: '12px 28px', fontSize: 15, fontWeight: 600,
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-        }}>💬 Track on WhatsApp</a>
-      </div>
-    </div>
-  )
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '32px 20px' }}>
-      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 28, color: '#1a1a1a' }}>Checkout</h1>
+    <div style={{ paddingTop: 100, minHeight: '100vh' }}>
+      <div className="container" style={{ maxWidth: 800, paddingBottom: 80 }}>
+        <Reveal>
+          <Link href="/shop" style={{
+            display: 'flex', alignItems: 'center', gap: 6, color: 'var(--f-text-muted)',
+            fontSize: 14, fontWeight: 600, marginBottom: 24, textDecoration: 'none',
+          }}>
+            <FIcon name="arrowLeft" size={16} color="var(--f-text-muted)" /> Back to shop
+          </Link>
+        </Reveal>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        {/* Delivery */}
-        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #eee', padding: 24 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 16 }}>Delivery Information</h3>
+        <Reveal>
+          <h1 style={{ fontSize: 'clamp(26px, 3.5vw, 36px)', fontWeight: 800, color: 'var(--f-text)', letterSpacing: '-0.03em', marginBottom: 32 }}>
+            Checkout
+          </h1>
+        </Reveal>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            {/* Name */}
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#555', display: 'block', marginBottom: 6 }}>
-                Full Name / নাম <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="আপনার নাম"
-                value={form.name}
-                onChange={e => field('name', e.target.value)}
-                style={{
-                  width: '100%', padding: '10px 14px', borderRadius: 8, fontSize: 14,
-                  border: `1.5px solid ${errors.name ? '#ef4444' : '#e0e0e0'}`,
-                }}
-              />
-              {errors.name && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.name}</p>}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label style={{ fontSize: 13, fontWeight: 500, color: '#555', display: 'block', marginBottom: 6 }}>
-                Phone / ফোন <span style={{ color: '#ef4444' }}>*</span>
-              </label>
-              <input
-                type="tel"
-                placeholder="01XXX-XXXXXX"
-                value={form.phone}
-                onChange={e => field('phone', e.target.value)}
-                style={{
-                  width: '100%', padding: '10px 14px', borderRadius: 8, fontSize: 14,
-                  border: `1.5px solid ${errors.phone ? '#ef4444' : '#e0e0e0'}`,
-                }}
-              />
-              {errors.phone && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.phone}</p>}
-            </div>
-          </div>
-
-          {/* Address */}
-          <div style={{ marginTop: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: '#555', display: 'block', marginBottom: 6 }}>
-              Address / ঠিকানা <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <textarea
-              rows={3}
-              placeholder="Full delivery address"
-              value={form.address}
-              onChange={e => field('address', e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: 8, fontSize: 14, resize: 'vertical',
-                border: `1.5px solid ${errors.address ? '#ef4444' : '#e0e0e0'}`,
-              }}
-            />
-            {errors.address && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.address}</p>}
-          </div>
-
-          {/* Delivery Date */}
-          <div style={{ marginTop: 12 }}>
-            <label style={{ fontSize: 13, fontWeight: 500, color: '#555', display: 'block', marginBottom: 6 }}>
-              Delivery Date / ডেলিভারির তারিখ <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type="date"
-              min={today}
-              value={form.deliveryDate}
-              onChange={e => field('deliveryDate', e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: 8, fontSize: 14,
-                border: `1.5px solid ${errors.deliveryDate ? '#ef4444' : '#e0e0e0'}`,
-              }}
-            />
-            {errors.deliveryDate && <p style={{ color: '#ef4444', fontSize: 12, marginTop: 4 }}>{errors.deliveryDate}</p>}
-          </div>
-        </div>
-
-        {/* Payment */}
-        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #eee', padding: 24 }}>
-          <h3 style={{ fontSize: 17, fontWeight: 600, marginBottom: 16 }}>Payment Method / পেমেন্ট</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
-            {PAYMENTS.map(m => (
-              <button key={m.id} onClick={() => setPayment(m.id)} style={{
-                background: payment === m.id ? m.color + '12' : '#f8f8f8',
-                border: `2px solid ${payment === m.id ? m.color : 'transparent'}`,
-                borderRadius: 10, padding: '14px 16px',
-                fontSize: 14, fontWeight: 600,
-                color: payment === m.id ? m.color : '#666',
-                textAlign: 'center', transition: 'all .15s',
-              }}>{m.label}</button>
+        {/* Steps indicator */}
+        <Reveal delay={100}>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 40 }}>
+            {['Address', 'Delivery', 'Payment'].map((s, i) => (
+              <div key={i} style={{
+                flex: 1, height: 4, borderRadius: 2,
+                background: i <= step ? 'var(--f-aqua)' : 'var(--f-border)',
+                transition: 'background 0.3s ease',
+              }} />
             ))}
           </div>
-        </div>
+        </Reveal>
 
-        {/* Place Order */}
-        <div style={{
-          background: ACCENT + '08', borderRadius: 14, padding: 24,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16,
-        }}>
-          <div>
-            <div style={{ fontSize: 14, color: '#666' }}>
-              Total: <strong style={{ fontSize: 22, color: '#1a1a1a' }}>৳{subtotal + deliveryFee}</strong>
+        <div className="grid-2col" style={{ display: 'grid', gridTemplateColumns: '1.3fr 0.7fr', gap: 32 }}>
+          {/* Left: Form */}
+          <Reveal delay={150}>
+            <div style={{ background: 'var(--f-surface)', borderRadius: 'var(--f-radius-lg)', padding: 32, border: '1px solid var(--f-border)' }}>
+              {step === 0 && (
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--f-text)', marginBottom: 20 }}>Delivery Address</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <input style={inputStyle} placeholder="Full Name" value={address.name}
+                      onChange={e => setAddress({ ...address, name: e.target.value })} />
+                    <input style={inputStyle} placeholder="Phone Number" value={address.phone}
+                      onChange={e => setAddress({ ...address, phone: e.target.value })} />
+                    <input style={inputStyle} placeholder="Street Address" value={address.street}
+                      onChange={e => setAddress({ ...address, street: e.target.value })} />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                      <input style={inputStyle} placeholder="Area" value={address.area}
+                        onChange={e => setAddress({ ...address, area: e.target.value })} />
+                      <select style={{ ...inputStyle, cursor: 'pointer' }} value={address.city}
+                        onChange={e => setAddress({ ...address, city: e.target.value })}>
+                        <option>Ishwardi</option><option>Pabna</option><option>Rajshahi</option><option>Dhaka</option>
+                      </select>
+                    </div>
+                  </div>
+                  <FButton variant="primary" size="lg" fullWidth onClick={() => setStep(1)}
+                    style={{ marginTop: 24 }}>Continue to Delivery</FButton>
+                </div>
+              )}
+
+              {step === 1 && (
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--f-text)', marginBottom: 20 }}>Delivery Slot</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {slots.map(s => (
+                      <button key={s.id} onClick={() => setDeliverySlot(s.id)} style={{
+                        display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px',
+                        borderRadius: 'var(--f-radius-md)', cursor: 'pointer',
+                        background: deliverySlot === s.id ? 'var(--f-aqua-light)' : 'var(--f-bg)',
+                        border: `2px solid ${deliverySlot === s.id ? 'var(--f-aqua)' : 'var(--f-border)'}`,
+                        transition: 'all 0.2s ease', textAlign: 'left',
+                      }}>
+                        <div style={{
+                          width: 20, height: 20, borderRadius: '50%',
+                          border: `2px solid ${deliverySlot === s.id ? 'var(--f-aqua)' : 'var(--f-border)'}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          {deliverySlot === s.id && <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--f-aqua)' }} />}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>{s.label}</div>
+                          <div style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{s.time}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+                    <FButton variant="secondary" size="md" onClick={() => setStep(0)}>Back</FButton>
+                    <FButton variant="primary" size="lg" onClick={() => setStep(2)} style={{ flex: 1 }}>Continue to Payment</FButton>
+                  </div>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--f-text)', marginBottom: 20 }}>Payment Method</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    {payments.map(p => (
+                      <button key={p.id} onClick={() => setPayment(p.id)} style={{
+                        padding: '20px 16px', borderRadius: 'var(--f-radius-md)', cursor: 'pointer',
+                        background: payment === p.id ? 'var(--f-aqua-light)' : 'var(--f-bg)',
+                        border: `2px solid ${payment === p.id ? 'var(--f-aqua)' : 'var(--f-border)'}`,
+                        textAlign: 'center', transition: 'all 0.2s ease',
+                      }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 10, margin: '0 auto 8px',
+                          background: p.color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <div style={{ width: 14, height: 14, borderRadius: 4, background: p.color }} />
+                        </div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--f-text)' }}>{p.label}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10, marginTop: 20,
+                    padding: '12px 16px', borderRadius: 'var(--f-radius-md)',
+                    background: 'rgba(46,204,113,0.06)', border: '1px solid rgba(46,204,113,0.15)',
+                  }}>
+                    <FIcon name="shield" size={18} color="#27ae60" />
+                    <span style={{ fontSize: 13, color: '#27ae60', fontWeight: 500 }}>Your payment is secure and encrypted</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+                    <FButton variant="secondary" size="md" onClick={() => setStep(1)}>Back</FButton>
+                    <FButton variant="primary" size="lg" onClick={() => { setOrderPlaced(true); clearCart() }} style={{ flex: 1 }}>
+                      Place Order · {fmt(subtotal)}
+                    </FButton>
+                  </div>
+                </div>
+              )}
             </div>
-            <div style={{ fontSize: 13, color: '#888' }}>{cart.length} items + delivery</div>
-          </div>
-          <button
-            onClick={handlePlaceOrder}
-            style={{
-              background: ACCENT, color: '#fff', border: 'none', borderRadius: 10,
-              padding: '14px 40px', fontSize: 16, fontWeight: 600,
-            }}
-          >Place Order</button>
+          </Reveal>
+
+          {/* Right: Order Summary */}
+          <Reveal delay={200}>
+            <div style={{
+              background: 'var(--f-surface)', borderRadius: 'var(--f-radius-lg)',
+              padding: 24, border: '1px solid var(--f-border)', position: 'sticky', top: 100,
+            }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--f-text)', marginBottom: 16 }}>Order Summary</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {cart.map(({ product, qty }) => (
+                  <div key={product.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-text)' }}>{product.name}</span>
+                      <span style={{ fontSize: 13, color: 'var(--f-text-muted)', marginLeft: 6 }}>×{qty}</span>
+                    </div>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-text)' }}>
+                      {fmt(product.price * qty)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ borderTop: '1px solid var(--f-border)', marginTop: 16, paddingTop: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>Subtotal</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-text)' }}>{fmt(subtotal)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>Delivery</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-aqua)' }}>Free</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--f-border)', marginTop: 8 }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--f-text)' }}>Total</span>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--f-text)' }}>{fmt(subtotal)}</span>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         </div>
       </div>
     </div>

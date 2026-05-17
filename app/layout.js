@@ -1,27 +1,35 @@
-import { DM_Sans } from 'next/font/google'
+import { Plus_Jakarta_Sans, Noto_Sans_Bengali } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
-import WhatsAppButton from '@/components/WhatsAppButton'
+import { ThemeProvider } from '@/context/ThemeContext'
+import AppShell from '@/components/AppShell'
 
-const font = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--f-font',
+})
+
+const bengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--f-font-bn',
+})
 
 export const metadata = {
   title: 'Fishora — Fresh Halal Protein Store',
-  description: 'Fresh fish, meat, eggs and prawns. Nationwide delivery from Ishwardi, Pabna. 100% Halal.',
+  description: 'Fresh fish, meat, eggs and prawns. Nationwide delivery from Ishwardi, Pabna. 100% Halal. Order via WhatsApp.',
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={font.className}>
-        <CartProvider>
-          <Navbar />
-          <main style={{ minHeight: '80vh' }}>{children}</main>
-          <Footer />
-          <WhatsAppButton />
-        </CartProvider>
+    <html lang="en" className={`${jakarta.variable} ${bengali.variable}`}>
+      <body style={{ fontFamily: 'var(--f-font)' }}>
+        <ThemeProvider>
+          <CartProvider>
+            <AppShell>{children}</AppShell>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
