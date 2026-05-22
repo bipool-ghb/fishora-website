@@ -131,7 +131,7 @@ function HeroSection() {
           }}>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Today&apos;s Pick</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>ইলিশ · Ilish</div>
-            <div style={{ fontSize: 13, color: '#66BB6A', fontWeight: 600, marginTop: 2 }}>৳1,200/kg</div>
+            {/* Price hidden */}
           </GlassCard>
         </div>
       </div>
@@ -307,9 +307,7 @@ function ComboCard({ combo, onAdd }) {
           width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5,
           transition: 'transform 0.6s ease', transform: hov ? 'scale(1.07)' : 'scale(1)',
         }} onError={e => e.target.style.display = 'none'} />
-        <div style={{ position: 'absolute', top: 12, left: 12 }}>
-          <Badge text={`Save ৳${combo.save}`} variant="fresh" style={{ background: '#fff', color: '#1B5E20' }} />
-        </div>
+        {/* Save badge hidden */}
       </div>
       <div style={{ padding: '18px 20px' }}>
         <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--f-text)', marginBottom: 2 }}>{combo.name}</h3>
@@ -321,21 +319,7 @@ function ComboCard({ combo, onAdd }) {
             </li>
           ))}
         </ul>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
-          <div>
-            <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-text)' }}>৳{combo.price.toLocaleString()}</span>
-            <span style={{ fontSize: 14, color: 'var(--f-text-muted)', textDecoration: 'line-through', marginLeft: 8 }}>৳{combo.originalPrice.toLocaleString()}</span>
-          </div>
-          <button onClick={handleAdd} style={{
-            padding: '10px 20px', borderRadius: 'var(--f-radius-full)',
-            background: added ? '#2E7D32' : 'var(--f-aqua)', color: '#fff', border: 'none',
-            fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(46,125,50,0.3)',
-          }}>
-            {added ? '✓ Added' : 'Add to Cart'}
-          </button>
-        </div>
+        {/* Price and Add to Cart hidden */}
       </div>
     </div>
   )

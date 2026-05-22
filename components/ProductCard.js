@@ -67,20 +67,7 @@ export default function ProductCard({ product, onAdd }) {
           {product.rating && <StarRating rating={product.rating} size={11} />}
         </div>
         <p style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{product.weight} · {product.source}</p>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-text)' }}>৳{product.price.toLocaleString()}</span>
-          <button onClick={handleAdd} style={{
-            width: 38, height: 38, borderRadius: '50%',
-            background: added ? '#2ecc71' : 'var(--f-aqua)', color: '#fff', border: 'none',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 20, fontWeight: 400, cursor: 'pointer',
-            transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
-            transform: hov && !added ? 'scale(1.12)' : 'scale(1)',
-            boxShadow: '0 4px 12px rgba(46,125,50,0.3)',
-          }}>
-            {added ? '✓' : '+'}
-          </button>
-        </div>
+        {/* Price and Add to Cart hidden */}
       </div>
     </div>
   )

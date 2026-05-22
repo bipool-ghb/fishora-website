@@ -86,26 +86,7 @@ export default function Navbar({ onCartOpen }) {
               <FIcon name={dark ? 'sun' : 'moon'} size={17} color={textColor} />
             </button>
 
-            {/* Cart */}
-            <button onClick={onCartOpen} style={{
-              width: 38, height: 38, borderRadius: '50%', position: 'relative',
-              background: isHero ? 'rgba(255,255,255,0.08)' : 'var(--f-bg-alt)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s ease',
-            }}>
-              <FIcon name="cart" size={17} color={textColor} />
-              {cartCount > 0 && (
-                <span style={{
-                  position: 'absolute', top: -2, right: -2,
-                  width: 20, height: 20, borderRadius: '50%',
-                  background: 'var(--f-aqua)', color: '#fff',
-                  fontSize: 11, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  animation: 'scaleIn 0.3s cubic-bezier(0.16,1,0.3,1)',
-                }}>{cartCount}</span>
-              )}
-            </button>
+            {/* Cart button hidden */}
 
             {/* Mobile menu button */}
             <button
@@ -159,28 +140,8 @@ export default function Navbar({ onCartOpen }) {
         {[
           { href: '/', icon: 'home', label: 'Home' },
           { href: '/shop', icon: 'search', label: 'Shop' },
-          { action: 'cart', icon: 'cart', label: 'Cart', badge: cartCount },
           { href: '/about', icon: 'user', label: 'About' },
         ].map(item => (
-          item.action === 'cart' ? (
-            <button key="cart" onClick={onCartOpen} style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-              background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px',
-              position: 'relative',
-            }}>
-              <FIcon name={item.icon} size={20} color="var(--f-text-muted)" />
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--f-text-muted)' }}>{item.label}</span>
-              {item.badge > 0 && (
-                <span style={{
-                  position: 'absolute', top: 0, right: 4,
-                  width: 16, height: 16, borderRadius: '50%',
-                  background: 'var(--f-aqua)', color: '#fff',
-                  fontSize: 9, fontWeight: 700,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>{item.badge}</span>
-              )}
-            </button>
-          ) : (
             <Link key={item.href} href={item.href} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               padding: '6px 12px', textDecoration: 'none',
@@ -192,7 +153,6 @@ export default function Navbar({ onCartOpen }) {
                 color: pathname === item.href ? 'var(--f-aqua)' : 'var(--f-text-muted)',
               }}>{item.label}</span>
             </Link>
-          )
         ))}
       </div>
     </>

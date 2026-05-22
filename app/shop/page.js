@@ -66,8 +66,6 @@ export default function ShopPage() {
               cursor: 'pointer', outline: 'none',
             }}>
               <option value="popular">Most Popular</option>
-              <option value="price-low">Price: Low → High</option>
-              <option value="price-high">Price: High → Low</option>
               <option value="rating">Top Rated</option>
             </select>
           </div>
