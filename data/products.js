@@ -1,7 +1,7 @@
 export const PHONE = '01357-187246'
 export const WHATSAPP = '8801357187246'
 export const LOCATION = 'Bishwas Super Market, College Road, Ishwardi, Pabna'
-export const HOURS = '6 AM – 10 PM Daily'
+export const HOURS = '8 AM – 9 PM Daily'
 
 export const CATEGORIES = [
   { id: 'all', name: 'All Products', nameBn: 'সকল পণ্য', count: 15 },
