@@ -153,20 +153,16 @@ export function StarRating({ rating, size = 14 }) {
 
 // ========== FISHORA LOGO ==========
 export function FishoraLogo({ light = false, size = 'md' }) {
-  const s = { sm: 18, md: 24, lg: 30 }[size] || 24
+  const h = { sm: 36, md: 48, lg: 64 }[size] || 48
+  const src = light
+    ? '/images/fishora_dark_background_logo.png'
+    : '/images/fishora_light_background_logo.png'
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 2, userSelect: 'none', cursor: 'pointer' }}>
-      <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', color: light ? '#fff' : 'var(--f-text)', lineHeight: 1 }}>
-        Fish
-      </span>
-      <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--f-aqua)', lineHeight: 1 }}>
-        ora
-      </span>
-      <span style={{
-        width: 5, height: 5, borderRadius: '50%', background: 'var(--f-gold)',
-        display: 'inline-block', marginLeft: 1, alignSelf: 'flex-start', marginTop: 2,
-      }}></span>
-    </div>
+    <img
+      src={src}
+      alt="Fishora — Fresh Inside"
+      style={{ height: h, width: 'auto', display: 'block', userSelect: 'none', cursor: 'pointer' }}
+    />
   )
 }
 
