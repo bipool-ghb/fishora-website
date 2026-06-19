@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Badge, StarRating } from './ui'
 
 const badgeVariants = {
@@ -8,6 +9,7 @@ const badgeVariants = {
 }
 
 export default function ProductCard({ product, onAdd }) {
+  const router = useRouter()
   const [hov, setHov] = useState(false)
   const [added, setAdded] = useState(false)
 
@@ -20,6 +22,7 @@ export default function ProductCard({ product, onAdd }) {
 
   return (
     <div
+      onClick={() => router.push(`/shop/product?id=${product.productId || product.id}`)}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
@@ -28,6 +31,7 @@ export default function ProductCard({ product, onAdd }) {
         transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
         transform: hov ? 'translateY(-6px)' : 'none',
         border: '1px solid var(--f-border)', cursor: 'pointer',
+        display: 'flex', flexDirection: 'column', height: '100%',
       }}
     >
       {/* Image */}
@@ -58,16 +62,34 @@ export default function ProductCard({ product, onAdd }) {
       </div>
 
       {/* Content */}
-      <div style={{ padding: '16px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-          <div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--f-text)', marginBottom: 2 }}>{product.name}</h3>
-            <span style={{ fontFamily: 'var(--f-font-bn)', fontSize: 13, color: 'var(--f-text-muted)' }}>{product.nameBn}</span>
-          </div>
-          {product.rating && <StarRating rating={product.rating} size={11} />}
+      <div style={{ padding: '16px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginBottom: 6 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--f-text)', marginBottom: 4, lineHeight: 1.3 }}>{product.name}</h3>
+          {product.nameBn && (
+            <p style={{ fontSize: 13, color: 'var(--f-text-muted)', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{product.nameBn}</p>
+          )}
         </div>
-        <p style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{product.weight} · {product.source}</p>
-        {/* Price and Add to Cart hidden */}
+        <p style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{product.weight}</p>
+
+        {/* Price and Add to Cart */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--f-border)' }}>
+          <div>
+            <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-aqua)' }}>৳{product.price}</span>
+            <span style={{ fontSize: 12, color: 'var(--f-text-muted)', marginLeft: 4 }}>/{product.unit || 'kg'}</span>
+          </div>
+          <button
+            onClick={handleAdd}
+            style={{
+              padding: '10px 20px', borderRadius: 'var(--f-radius-full)', border: 'none',
+              background: added ? '#2ecc71' : 'var(--f-aqua)',
+              color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: hov ? 'scale(1.05)' : 'scale(1)',
+            }}
+          >
+            {added ? '✓ Added' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   )
