@@ -93,6 +93,7 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 768px) {
   .container { padding: 0 16px; }
   .nav-desktop { display: none !important; }
+  .nav-desktop-only { display: none !important; }
   .nav-hamburger { display: block !important; }
   .grid-2col { grid-template-columns: 1fr !important; }
   .hero-grid { grid-template-columns: 1fr !important; }

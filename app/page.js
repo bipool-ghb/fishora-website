@@ -5,7 +5,10 @@ import { useCart } from '@/context/CartContext'
 import ProductCard from '@/components/ProductCard'
 import FIcon from '@/components/FIcon'
 import { Reveal, GlassCard, Badge, SectionHeader, FButton, StarRating, NakshiPattern } from '@/components/ui'
+import ComboCard from '@/components/ComboCard'
 import { PRODUCTS, COMBOS, SERVICES, TESTIMONIALS, TRUST, CATEGORIES, WHATSAPP, PHONE, LOCATION, HOURS } from '@/data/products'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
 
 const featured = PRODUCTS.filter(p => ['Premium', 'Popular', 'Halal'].includes(p.badge)).slice(0, 6)
 
@@ -92,7 +95,7 @@ function HeroSection() {
           </p>
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', ...anim(650) }}>
             <FButton variant="primary" size="lg" href="/shop" onClick={null}>
-              <Link href="/shop" style={{ color: '#fff', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>Shop Now</Link>
+              Shop Now
             </FButton>
             <FButton variant="ghost" size="lg" href={`https://wa.me/${WHATSAPP}`}
               icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.77.46 3.44 1.27 4.89L2 22l5.11-1.27C8.56 21.54 10.23 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.57 0-3.07-.4-4.39-1.15l-.31-.18-3.22.84.86-3.14-.2-.32A7.963 7.963 0 014 12c0-4.42 3.58-8 8-8s8 3.58 8 8-3.58 8-8 8z"/></svg>}>
@@ -263,34 +266,58 @@ function FeaturedSection({ onAdd }) {
 
 // ─── COMBOS ───
 function ComboSection({ onAdd }) {
+  const [apiCombos, setApiCombos] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/v1/public/combo-items`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data) setApiCombos(data.data)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const combosToShow = apiCombos.length > 0 ? apiCombos.slice(0, 4) : COMBOS.slice(0, 4)
+  const useApi = apiCombos.length > 0
+
   return (
     <section style={{ padding: '80px 0' }}>
       <div className="container">
         <SectionHeader title="Combo Deals" titleBn="কম্বো অফার — একসাথে কিনুন, বেশি সাশ্রয় করুন"
           subtitle="Save more when you buy together — curated packs for every need." />
-        <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24,
-        }}>
-          {COMBOS.slice(0, 4).map((combo, i) => (
-            <Reveal key={combo.id} delay={i * 80}>
-              <ComboCard combo={combo} onAdd={onAdd} />
-            </Reveal>
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--f-text-muted)' }}>
+            <div style={{ width: 32, height: 32, border: '3px solid var(--f-border)', borderTopColor: 'var(--f-aqua)', borderRadius: '50%', margin: '0 auto', animation: 'spin 0.8s linear infinite' }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24,
+          }}>
+            {useApi ? (
+              combosToShow.map((combo, i) => (
+                <Reveal key={combo.id} delay={i * 80}>
+                  <ComboCard combo={combo} onAdd={onAdd} />
+                </Reveal>
+              ))
+            ) : (
+              combosToShow.map((combo, i) => (
+                <Reveal key={combo.id} delay={i * 80}>
+                  <FallbackComboCard combo={combo} />
+                </Reveal>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </section>
   )
 }
 
-function ComboCard({ combo, onAdd }) {
+function FallbackComboCard({ combo }) {
   const [hov, setHov] = useState(false)
-  const [added, setAdded] = useState(false)
-  const handleAdd = () => {
-    onAdd && onAdd({ id: combo.id, name: combo.name, nameBn: combo.nameBn, price: combo.price, weight: 'pack', image: combo.image, badge: 'Best Value', freshness: 'Combo Pack', rating: 4.8, source: 'Mixed' })
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1200)
-  }
-
   return (
     <div onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
       background: 'var(--f-surface)', borderRadius: 'var(--f-radius-lg)', overflow: 'hidden',
@@ -307,7 +334,6 @@ function ComboCard({ combo, onAdd }) {
           width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5,
           transition: 'transform 0.6s ease', transform: hov ? 'scale(1.07)' : 'scale(1)',
         }} onError={e => e.target.style.display = 'none'} />
-        {/* Save badge hidden */}
       </div>
       <div style={{ padding: '18px 20px' }}>
         <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--f-text)', marginBottom: 2 }}>{combo.name}</h3>
@@ -315,11 +341,10 @@ function ComboCard({ combo, onAdd }) {
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {combo.items.map((item, j) => (
             <li key={j} style={{ fontSize: 13, color: 'var(--f-text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: 'var(--f-aqua)', fontWeight: 700 }}>✓</span> {item}
+              <span style={{ color: 'var(--f-aqua)', fontWeight: 700 }}>{'\u2713'}</span> {item}
             </li>
           ))}
         </ul>
-        {/* Price and Add to Cart hidden */}
       </div>
     </div>
   )

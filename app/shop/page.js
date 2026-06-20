@@ -2,18 +2,21 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
 import ProductCard from '@/components/ProductCard'
+import ComboCard from '@/components/ComboCard'
 import FIcon from '@/components/FIcon'
-import { Reveal } from '@/components/ui'
+import { Reveal, SectionHeader } from '@/components/ui'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
 
 export default function ShopPage() {
-  const { addToCart } = useCart()
+  const { addToCart, appliedOffer, applyOffer } = useCart()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [sort, setSort] = useState('popular')
   const [apiProducts, setApiProducts] = useState([])
   const [apiCategories, setApiCategories] = useState([])
   const [loading, setLoading] = useState(true)
+  const [offers, setOffers] = useState([])
+  const [combos, setCombos] = useState([])
 
   // Fetch categories from POS API
   useEffect(() => {
@@ -22,6 +25,30 @@ export default function ShopPage() {
       .then(data => {
         if (data.success && data.data) {
           setApiCategories(data.data)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  // Fetch active offers
+  useEffect(() => {
+    fetch(`${API_URL}/api/v1/public/offers`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setOffers(data.data)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  // Fetch combo items
+  useEffect(() => {
+    fetch(`${API_URL}/api/v1/public/combo-items`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.data) {
+          setCombos(data.data)
         }
       })
       .catch(() => {})
@@ -134,6 +161,54 @@ export default function ShopPage() {
           </div>
         </Reveal>
 
+        {/* Active Offers */}
+        {offers.length > 0 && (
+          <Reveal delay={80}>
+            <div style={{
+              display: 'flex', gap: 10, marginBottom: 24, overflowX: 'auto',
+              paddingBottom: 4, scrollbarWidth: 'none', msOverflowStyle: 'none',
+            }}>
+              {offers.map((offer, i) => {
+                const isActive = appliedOffer?.code === offer.code
+                return (
+                  <button key={offer.id || i} onClick={() => offer.code && applyOffer(offer)} style={{
+                    flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 18px', borderRadius: 'var(--f-radius-full)',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(46,125,50,0.18), rgba(0,150,136,0.18))'
+                      : 'linear-gradient(135deg, rgba(46,125,50,0.08), rgba(0,150,136,0.08))',
+                    border: isActive ? '2px solid var(--f-aqua)' : '1.5px solid rgba(46,125,50,0.18)',
+                    cursor: offer.code ? 'pointer' : 'default',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    <span style={{ fontSize: 16 }}>{isActive ? '✅' : '🏷️'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? 'var(--f-aqua)' : 'var(--f-text)' }}>
+                        {offer.name}
+                      </span>
+                      <span style={{ fontSize: 12, color: 'var(--f-aqua)', fontWeight: 600 }}>
+                        {offer.discount_type === 'PERCENTAGE' ? `${offer.discount_value}% off` : `৳${offer.discount_value} off`}
+                      </span>
+                    </div>
+                    {offer.code && (
+                      <span style={{
+                        padding: '4px 10px', borderRadius: 'var(--f-radius-md)',
+                        background: isActive ? 'var(--f-aqua)' : 'var(--f-surface)',
+                        border: isActive ? 'none' : '1px dashed var(--f-aqua)',
+                        fontSize: 12, fontWeight: 700,
+                        color: isActive ? '#fff' : 'var(--f-aqua)',
+                        letterSpacing: '0.06em', textTransform: 'uppercase',
+                      }}>
+                        {isActive ? '✓ Applied' : offer.code}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </Reveal>
+        )}
+
         {/* Search + Sort */}
         <Reveal delay={100}>
           <div style={{ display: 'flex', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
@@ -190,6 +265,23 @@ export default function ShopPage() {
             ))}
           </div>
         </Reveal>
+
+        {/* Combo Deals */}
+        {combos.length > 0 && (
+          <Reveal delay={180}>
+            <div style={{ marginBottom: 48 }}>
+              <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-text)', marginBottom: 6 }}>Combo Deals</h2>
+              <p style={{ fontSize: 14, color: 'var(--f-text-muted)', marginBottom: 20 }}>Save more when you buy together</p>
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 24,
+              }}>
+                {combos.map((combo, i) => (
+                  <ComboCard key={combo.id} combo={combo} onAdd={(item) => addToCart(item)} />
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        )}
 
         {/* Product Grid */}
         {loading ? (

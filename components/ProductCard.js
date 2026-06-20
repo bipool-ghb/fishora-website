@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCart } from '@/context/CartContext'
 import { Badge, StarRating } from './ui'
+import FIcon from './FIcon'
 
 const badgeVariants = {
   Premium: 'premium', Popular: 'popular', Fresh: 'fresh',
@@ -10,14 +12,26 @@ const badgeVariants = {
 
 export default function ProductCard({ product, onAdd }) {
   const router = useRouter()
+  const { cart, updateQty, STEP, MIN_QTY } = useCart()
   const [hov, setHov] = useState(false)
-  const [added, setAdded] = useState(false)
+
+  // Find this product in cart (match by variant id stored as product.id)
+  const cartItem = cart.find(i => i.product?.id === product.id)
+  const inCart = !!cartItem
 
   const handleAdd = (e) => {
     e.stopPropagation()
     onAdd && onAdd(product)
-    setAdded(true)
-    setTimeout(() => setAdded(false), 1200)
+  }
+
+  const handleDecrease = (e) => {
+    e.stopPropagation()
+    if (cartItem) updateQty(product.id, Math.round((cartItem.qty - STEP) / STEP) * STEP)
+  }
+
+  const handleIncrease = (e) => {
+    e.stopPropagation()
+    if (cartItem) updateQty(product.id, Math.round((cartItem.qty + STEP) / STEP) * STEP)
   }
 
   return (
@@ -71,24 +85,44 @@ export default function ProductCard({ product, onAdd }) {
         </div>
         <p style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>{product.weight}</p>
 
-        {/* Price and Add to Cart */}
+        {/* Price and Add to Cart / Qty Stepper */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 14, borderTop: '1px solid var(--f-border)' }}>
           <div>
             <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-aqua)' }}>৳{product.price}</span>
             <span style={{ fontSize: 12, color: 'var(--f-text-muted)', marginLeft: 4 }}>/{product.unit || 'kg'}</span>
           </div>
-          <button
-            onClick={handleAdd}
-            style={{
-              padding: '10px 20px', borderRadius: 'var(--f-radius-full)', border: 'none',
-              background: added ? '#2ecc71' : 'var(--f-aqua)',
-              color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              transform: hov ? 'scale(1.05)' : 'scale(1)',
-            }}
-          >
-            {added ? '✓ Added' : 'Add to Cart'}
-          </button>
+          {inCart ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', borderRadius: 'var(--f-radius-full)',
+              border: '2px solid var(--f-aqua)', overflow: 'hidden',
+            }}>
+              <button onClick={handleDecrease} style={{
+                width: 34, height: 34, background: 'rgba(0,150,136,0.08)', border: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}><FIcon name="minus" size={14} color="var(--f-aqua)" /></button>
+              <span style={{
+                minWidth: 48, textAlign: 'center', fontSize: 13, fontWeight: 800,
+                color: 'var(--f-aqua)', padding: '0 2px',
+              }}>{cartItem.qty} kg</span>
+              <button onClick={handleIncrease} style={{
+                width: 34, height: 34, background: 'rgba(0,150,136,0.08)', border: 'none',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}><FIcon name="plus" size={14} color="var(--f-aqua)" /></button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              style={{
+                padding: '10px 20px', borderRadius: 'var(--f-radius-full)', border: 'none',
+                background: 'var(--f-aqua)',
+                color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                transform: hov ? 'scale(1.05)' : 'scale(1)',
+              }}
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
     </div>

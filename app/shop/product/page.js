@@ -8,13 +8,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
 function ProductDetailContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { addToCart } = useCart()
+  const { addToCart, STEP, MIN_QTY } = useCart()
   const productId = searchParams.get('id')
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [added, setAdded] = useState(false)
   const [selectedVariant, setSelectedVariant] = useState(0)
+  const [qty, setQty] = useState(1)
 
   useEffect(() => {
     if (!productId) return
@@ -62,9 +63,14 @@ function ProductDetailContent() {
       weight: variant?.size_label || '',
       image: product.image_url || '',
       unit: variant?.unit || 'kg',
-    })
+    }, qty)
     setAdded(true)
     setTimeout(() => setAdded(false), 1500)
+  }
+
+  const handleQtyBlur = () => {
+    const rounded = Math.round(qty / STEP) * STEP
+    setQty(Math.max(rounded, MIN_QTY))
   }
 
   return (
@@ -129,15 +135,47 @@ function ProductDetailContent() {
             </div>
           )}
 
-          {/* Add to cart */}
-          <button onClick={handleAdd} style={{
-            padding: '14px 36px', borderRadius: 28, border: 'none',
-            background: added ? '#2ecc71' : 'var(--f-aqua)',
-            color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer',
-            transition: 'all 0.3s', width: '100%', maxWidth: 300,
-          }}>
-            {added ? '✓ Added to Cart' : 'Add to Cart'}
-          </button>
+          {/* Quantity selector + Add to cart */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', borderRadius: 28,
+              border: '1.5px solid var(--f-border)', overflow: 'hidden',
+            }}>
+              <button onClick={() => setQty(q => Math.max(Math.round((q - STEP) / STEP) * STEP, MIN_QTY))} style={{
+                width: 40, height: 44, background: 'var(--f-bg)', border: 'none',
+                cursor: 'pointer', fontSize: 18, fontWeight: 700, color: 'var(--f-text)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>−</button>
+              <input
+                type="number"
+                value={qty}
+                step={STEP}
+                min={MIN_QTY}
+                onChange={e => setQty(parseFloat(e.target.value) || MIN_QTY)}
+                onBlur={handleQtyBlur}
+                style={{
+                  width: 64, height: 44, textAlign: 'center', border: 'none',
+                  borderLeft: '1px solid var(--f-border)', borderRight: '1px solid var(--f-border)',
+                  fontSize: 15, fontWeight: 700, color: 'var(--f-text)',
+                  background: 'var(--f-surface)', outline: 'none',
+                }}
+              />
+              <button onClick={() => setQty(q => Math.round((q + STEP) / STEP) * STEP)} style={{
+                width: 40, height: 44, background: 'var(--f-bg)', border: 'none',
+                cursor: 'pointer', fontSize: 18, fontWeight: 700, color: 'var(--f-text)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>+</button>
+            </div>
+            <span style={{ fontSize: 13, color: 'var(--f-text-muted)', fontWeight: 600 }}>kg</span>
+            <button onClick={handleAdd} style={{
+              padding: '14px 36px', borderRadius: 28, border: 'none',
+              background: added ? '#2ecc71' : 'var(--f-aqua)',
+              color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer',
+              transition: 'all 0.3s', flex: 1, maxWidth: 200,
+            }}>
+              {added ? '✓ Added' : 'Add to Cart'}
+            </button>
+          </div>
 
           {/* Long description */}
           {product.long_description && (

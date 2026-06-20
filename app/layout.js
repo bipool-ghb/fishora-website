@@ -2,6 +2,7 @@ import { Plus_Jakarta_Sans, Noto_Sans_Bengali } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { CustomerAuthProvider } from '@/context/CustomerAuthContext'
 import AppShell from '@/components/AppShell'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -26,9 +27,11 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${jakarta.variable} ${bengali.variable}`}>
       <body style={{ fontFamily: 'var(--f-font)' }}>
         <ThemeProvider>
-          <CartProvider>
-            <AppShell>{children}</AppShell>
-          </CartProvider>
+          <CustomerAuthProvider>
+            <CartProvider>
+              <AppShell>{children}</AppShell>
+            </CartProvider>
+          </CustomerAuthProvider>
         </ThemeProvider>
       </body>
     </html>

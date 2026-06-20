@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import { useTheme } from '@/context/ThemeContext'
+import { useCustomerAuth } from '@/context/CustomerAuthContext'
 import FIcon from './FIcon'
 import { FishoraLogo } from './ui'
 
@@ -18,6 +19,7 @@ export default function Navbar({ onCartOpen }) {
   const pathname = usePathname()
   const { cartCount } = useCart()
   const { dark, toggleDark } = useTheme()
+  const { isLoggedIn, customer } = useCustomerAuth()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -75,6 +77,24 @@ export default function Navbar({ onCartOpen }) {
 
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {/* Account */}
+            <Link href={isLoggedIn ? '/account' : '/account/login'} title={isLoggedIn ? 'My Account' : 'Sign In'} style={{
+              height: 38, borderRadius: 'var(--f-radius-full)',
+              background: isHero ? 'rgba(255,255,255,0.08)' : 'var(--f-bg-alt)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s ease', textDecoration: 'none', gap: 6,
+              padding: isLoggedIn ? '0 14px 0 10px' : '0',
+              width: isLoggedIn ? 'auto' : 38,
+            }}>
+              <FIcon name="user" size={17} color={isLoggedIn ? 'var(--f-aqua)' : textColor} />
+              {isLoggedIn && (
+                <span className="nav-desktop-only" style={{ fontSize: 13, fontWeight: 600, color: textColor }}>
+                  {customer?.name?.split(' ')[0] || 'Account'}
+                </span>
+              )}
+            </Link>
+
             {/* Dark mode */}
             <button onClick={toggleDark} title="Toggle dark mode" style={{
               width: 38, height: 38, borderRadius: '50%',
@@ -86,7 +106,30 @@ export default function Navbar({ onCartOpen }) {
               <FIcon name={dark ? 'sun' : 'moon'} size={17} color={textColor} />
             </button>
 
-            {/* Cart button hidden */}
+            {/* Cart button */}
+            <button
+              onClick={onCartOpen}
+              style={{
+                width: 38, height: 38, borderRadius: '50%',
+                background: isHero ? 'rgba(255,255,255,0.08)' : 'var(--f-bg-alt)',
+                border: 'none', cursor: 'pointer', position: 'relative',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.2s',
+              }}
+            >
+              <FIcon name="cart" size={17} color={textColor} />
+              {cartCount > 0 && (
+                <span style={{
+                  position: 'absolute', top: -2, right: -2,
+                  width: 18, height: 18, borderRadius: '50%',
+                  background: 'var(--f-aqua)', color: '#fff',
+                  fontSize: 10, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {cartCount}
+                </span>
+              )}
+            </button>
 
             {/* Mobile menu button */}
             <button
@@ -140,7 +183,8 @@ export default function Navbar({ onCartOpen }) {
         {[
           { href: '/', icon: 'home', label: 'Home' },
           { href: '/shop', icon: 'search', label: 'Shop' },
-          { href: '/about', icon: 'user', label: 'About' },
+          ...(isLoggedIn ? [{ href: '/account/orders', icon: 'package', label: 'Orders' }] : []),
+          { href: isLoggedIn ? '/account' : '/account/login', icon: 'user', label: isLoggedIn ? 'Account' : 'Login' },
         ].map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useId } from 'react'
 
 // ========== SCROLL REVEAL ==========
 export function Reveal({ children, delay = 0, direction = 'up', style = {} }) {
@@ -179,7 +179,7 @@ export function FishoraLogo({ light = false, size = 'md' }) {
 
 // ========== NAKSHI PATTERN ==========
 export function NakshiPattern({ color = '#2E7D32', size = 300, opacity = 0.035, style = {} }) {
-  const pid = 'nk' + Math.random().toString(36).slice(2, 8)
+  const pid = 'nk' + useId().replace(/:/g, '')
   return (
     <svg width={size} height={size} viewBox="0 0 200 200" style={{ position: 'absolute', opacity, pointerEvents: 'none', ...style }}>
       <defs>

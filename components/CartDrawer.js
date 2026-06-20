@@ -1,16 +1,47 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/context/CartContext'
+import { useCustomerAuth } from '@/context/CustomerAuthContext'
 import FIcon from './FIcon'
 import { FButton } from './ui'
 import { WHATSAPP } from '@/data/products'
 import { useRouter } from 'next/navigation'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
+
 export default function CartDrawer({ open, onClose }) {
-  const { cart, updateQty, removeItem, subtotal } = useCart()
+  const { cart, updateQty, removeItem, subtotal, STEP, MIN_QTY, appliedOffer, clearOffer, getItemId } = useCart()
+  const { token } = useCustomerAuth()
   const router = useRouter()
+  const [discount, setDiscount] = useState(0)
+
+  // Validate coupon when cart or offer changes
+  useEffect(() => {
+    if (!appliedOffer?.code || !token || cart.length === 0) { setDiscount(0); return }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/customer/orders/validate-coupon`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            code: appliedOffer.code,
+            items: cart.filter(i => i.type !== 'combo').map(({ product, qty }) => ({ variant_id: product.id, quantity: qty, unit_price: product.price })),
+          }),
+        })
+        const json = await res.json()
+        const result = json.data || json
+        if (!cancelled && result.valid) setDiscount(Number(result.discount_amount) || 0)
+      } catch {}
+    })()
+    return () => { cancelled = true }
+  }, [appliedOffer, cart, token])
 
   const whatsAppOrder = () => {
-    const lines = cart.map(i => `• ${i.product.name} (${i.product.weight}) × ${i.qty} = ৳${(i.product.price * i.qty).toLocaleString()}`)
+    const lines = cart.map(i => {
+      if (i.type === 'combo') return `• [COMBO] ${i.comboName} × ${i.qty} = ৳${(i.comboPrice * i.qty).toLocaleString()}`
+      return `• ${i.product.name} (${i.product.weight}) × ${i.qty} = ৳${(i.product.price * i.qty).toLocaleString()}`
+    })
     const msg = `🛒 *Fishora Order*\n\n${lines.join('\n')}\n\n*Total: ৳${subtotal.toLocaleString()}*\n\nPlease confirm my order. Thank you!`
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank')
     onClose()
@@ -42,7 +73,7 @@ export default function CartDrawer({ open, onClose }) {
           <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--f-text)' }}>
             Your Cart
             <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--f-text-muted)', marginLeft: 8 }}>
-              ({cart.reduce((s, i) => s + i.qty, 0)} items)
+              ({cart.length} items)
             </span>
           </h2>
           <button onClick={onClose} style={{
@@ -64,49 +95,107 @@ export default function CartDrawer({ open, onClose }) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {cart.map(({ product, qty }) => (
-                <div key={product.id} style={{
-                  display: 'flex', gap: 14, padding: 14, borderRadius: 'var(--f-radius-md)',
-                  background: 'var(--f-surface)', border: '1px solid var(--f-border)',
-                }}>
-                  <div style={{
-                    width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
-                    background: 'linear-gradient(135deg, var(--f-bg-dark), var(--f-ocean-mid))',
-                  }}>
-                    <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={e => e.target.style.display = 'none'} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <div>
-                        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>{product.name}</div>
-                        <div style={{ fontSize: 12, color: 'var(--f-text-muted)' }}>{product.weight}</div>
-                      </div>
-                      <button onClick={() => removeItem(product.id)} style={{
-                        background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+              {cart.map((item) => {
+                if (item.type === 'combo') {
+                  const itemId = `combo-${item.comboId}`
+                  return (
+                    <div key={itemId} style={{
+                      display: 'flex', gap: 14, padding: 14, borderRadius: 'var(--f-radius-md)',
+                      background: 'var(--f-surface)', border: '1px solid var(--f-border)',
+                    }}>
+                      <div style={{
+                        width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
+                        background: 'linear-gradient(135deg, #1a472a, #2d5a3f)',
                       }}>
-                        <FIcon name="trash" size={16} color="var(--f-text-muted)" />
-                      </button>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', borderRadius: 'var(--f-radius-full)', border: '1px solid var(--f-border)', overflow: 'hidden' }}>
-                        <button onClick={() => updateQty(product.id, qty - 1)} style={{
-                          width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}><FIcon name="minus" size={14} color="var(--f-text)" /></button>
-                        <span style={{ width: 36, textAlign: 'center', fontSize: 14, fontWeight: 700, color: 'var(--f-text)' }}>{qty}</span>
-                        <button onClick={() => updateQty(product.id, qty + 1)} style={{
-                          width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}><FIcon name="plus" size={14} color="var(--f-text)" /></button>
+                        {item.comboImage && (
+                          <img src={item.comboImage} alt={item.comboName} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={e => e.target.style.display = 'none'} />
+                        )}
                       </div>
-                      <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--f-text)' }}>
-                        ৳{(product.price * qty).toLocaleString()}
-                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>{item.comboName}</div>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: 'rgba(0,150,136,0.8)', borderRadius: 4, padding: '1px 6px' }}>COMBO</span>
+                          </div>
+                          <button onClick={() => removeItem(itemId)} style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                          }}>
+                            <FIcon name="trash" size={16} color="var(--f-text-muted)" />
+                          </button>
+                        </div>
+                        {/* Component list */}
+                        <div style={{ fontSize: 11, color: 'var(--f-text-muted)', marginTop: 4, lineHeight: 1.5 }}>
+                          {(item.components || []).map((c, ci) => (
+                            <div key={ci}>{c.name} {c.quantity}{c.unit}</div>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderRadius: 'var(--f-radius-full)', border: '1px solid var(--f-border)', overflow: 'hidden' }}>
+                            <button onClick={() => updateQty(itemId, item.qty - 1)} style={{
+                              width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}><FIcon name="minus" size={14} color="var(--f-text)" /></button>
+                            <span style={{ minWidth: 36, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--f-text)' }}>{item.qty}</span>
+                            <button onClick={() => updateQty(itemId, item.qty + 1)} style={{
+                              width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}><FIcon name="plus" size={14} color="var(--f-text)" /></button>
+                          </div>
+                          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--f-text)' }}>
+                            ৳{(item.comboPrice * item.qty).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+                // Regular product item
+                const { product, qty } = item
+                return (
+                  <div key={product.id} style={{
+                    display: 'flex', gap: 14, padding: 14, borderRadius: 'var(--f-radius-md)',
+                    background: 'var(--f-surface)', border: '1px solid var(--f-border)',
+                  }}>
+                    <div style={{
+                      width: 72, height: 72, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
+                      background: 'linear-gradient(135deg, var(--f-bg-dark), var(--f-ocean-mid))',
+                    }}>
+                      <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={e => e.target.style.display = 'none'} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>{product.name}</div>
+                          <div style={{ fontSize: 12, color: 'var(--f-text-muted)' }}>{product.weight}</div>
+                        </div>
+                        <button onClick={() => removeItem(product.id)} style={{
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                        }}>
+                          <FIcon name="trash" size={16} color="var(--f-text-muted)" />
+                        </button>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderRadius: 'var(--f-radius-full)', border: '1px solid var(--f-border)', overflow: 'hidden' }}>
+                          <button onClick={() => updateQty(product.id, Math.round((qty - STEP) / STEP) * STEP)} style={{
+                            width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}><FIcon name="minus" size={14} color="var(--f-text)" /></button>
+                          <span style={{ minWidth: 44, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--f-text)' }}>{qty} kg</span>
+                          <button onClick={() => updateQty(product.id, Math.round((qty + STEP) / STEP) * STEP)} style={{
+                            width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}><FIcon name="plus" size={14} color="var(--f-text)" /></button>
+                        </div>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--f-text)' }}>
+                          ৳{(product.price * qty).toLocaleString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -118,13 +207,26 @@ export default function CartDrawer({ open, onClose }) {
               <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>Subtotal</span>
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-text)' }}>৳{subtotal.toLocaleString()}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>Delivery</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-aqua)' }}>Free</span>
-            </div>
+            {appliedOffer && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ color: '#27ae60', fontSize: 12 }}>✓</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#27ae60' }}>{appliedOffer.code}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 13, color: '#27ae60', fontWeight: 600 }}>
+                    {discount > 0 ? `-৳${discount.toLocaleString()}` : 'Validating...'}
+                  </span>
+                  <button onClick={() => { clearOffer(); setDiscount(0) }} style={{
+                    background: 'none', border: 'none', fontSize: 14, color: 'var(--f-text-muted)',
+                    cursor: 'pointer', fontWeight: 600, lineHeight: 1,
+                  }}>×</button>
+                </div>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '14px 0', borderTop: '1px solid var(--f-border)', marginTop: 8 }}>
               <span style={{ fontSize: 17, fontWeight: 800, color: 'var(--f-text)' }}>Total</span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--f-text)' }}>৳{subtotal.toLocaleString()}</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--f-text)' }}>৳{(subtotal - discount).toLocaleString()}</span>
             </div>
             <FButton variant="primary" size="lg" fullWidth onClick={() => { onClose(); router.push('/checkout') }}>
               Proceed to Checkout
