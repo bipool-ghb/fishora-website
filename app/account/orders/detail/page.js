@@ -327,6 +327,29 @@ function OrderDetailContent() {
                   )}
                 </div>
               )}
+              {order.loyalty_points_redeemed > 0 && (
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  marginBottom: 8, padding: '8px 12px', borderRadius: 'var(--f-radius-md)',
+                  background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#d97706', fontSize: 14, fontWeight: 700 }}>&#9733;</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text)' }}>
+                      Points Redeemed
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#b45309' }}>
+                    -{order.loyalty_points_redeemed.toLocaleString()} pts
+                  </span>
+                </div>
+              )}
+              {order.loyalty_discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 14, color: '#b45309' }}>Loyalty Discount</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#b45309' }}>-{fmt(order.loyalty_discount)}</span>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>
                   {order.fulfillment_type === 'PICKUP' ? 'Pickup' : 'Delivery'}
@@ -339,6 +362,21 @@ function OrderDetailContent() {
                 <span style={{ fontSize: 17, fontWeight: 800, color: 'var(--f-text)' }}>Total</span>
                 <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--f-aqua)' }}>{fmt(order.total)}</span>
               </div>
+              {order.loyalty_points_earned > 0 && (
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  marginTop: 12, padding: '10px 14px', borderRadius: 'var(--f-radius-md)',
+                  background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ color: '#d97706', fontSize: 15 }}>&#9733;</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--f-text)' }}>Points Earned</span>
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>
+                    +{order.loyalty_points_earned.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </Reveal>

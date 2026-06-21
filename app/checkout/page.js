@@ -35,6 +35,12 @@ export default function CheckoutPage() {
   const [couponName, setCouponName] = useState('')
   const [couponError, setCouponError] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0)
+  const [loyaltyInput, setLoyaltyInput] = useState('')
+  const [loyaltyApplied, setLoyaltyApplied] = useState(false)
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0)
+  const [loyaltyError, setLoyaltyError] = useState('')
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false)
   const calendarRef = { current: null }
 
   // Auto-apply offer from shop page
@@ -65,6 +71,20 @@ export default function CheckoutPage() {
       })()
     }
   }, [appliedOffer, token])
+
+  // Fetch loyalty points
+  useEffect(() => {
+    if (!isLoggedIn || !token) return
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/customer/loyalty`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json()
+        if (data.success) setLoyaltyPoints(data.data?.available_points || 0)
+      } catch {}
+    })()
+  }, [isLoggedIn, token])
 
   // Pre-fill from logged-in customer
   useEffect(() => {
@@ -194,6 +214,7 @@ export default function CheckoutPage() {
         fulfillment_type: fulfillmentType,
         payment_method: payment ? (PAYMENT_MAP[payment] || 'CASH_ON_DELIVERY') : 'CASH_ON_DELIVERY',
         ...(couponApplied ? { coupon_code: couponCode.trim() } : {}),
+        ...(loyaltyApplied ? { loyalty_points_to_redeem: parseInt(loyaltyInput, 10) } : {}),
         ...(fulfillmentType === 'DELIVERY' ? {
           delivery_address_id: addressId,
           delivery_address_snapshot: {
@@ -289,6 +310,40 @@ export default function CheckoutPage() {
     setCouponCode('')
     setCouponError('')
     clearOffer()
+  }
+
+  const applyLoyalty = async () => {
+    const pts = parseInt(loyaltyInput, 10)
+    if (!pts || pts < 100) { setLoyaltyError('Minimum 100 points required'); return }
+    if (pts > loyaltyPoints) { setLoyaltyError('You don\'t have enough points'); return }
+    setLoyaltyLoading(true)
+    setLoyaltyError('')
+    try {
+      const res = await fetch(`${API_URL}/api/v1/customer/orders/validate-loyalty-redemption`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ points: pts }),
+      })
+      const json = await res.json()
+      const result = json.data || json
+      if (result.valid !== false) {
+        setLoyaltyApplied(true)
+        setLoyaltyDiscount(result.discount_amount || Math.floor(pts / 100) * 10)
+      } else {
+        setLoyaltyError(result.message || 'Cannot redeem these points')
+      }
+    } catch {
+      setLoyaltyError('Failed to validate. Please try again.')
+    } finally {
+      setLoyaltyLoading(false)
+    }
+  }
+
+  const removeLoyalty = () => {
+    setLoyaltyApplied(false)
+    setLoyaltyDiscount(0)
+    setLoyaltyInput('')
+    setLoyaltyError('')
   }
 
   const handleContinueToDate = () => {
@@ -664,7 +719,7 @@ export default function CheckoutPage() {
                   <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
                     <FButton variant="secondary" size="md" onClick={() => setStep(fulfillmentType === 'PICKUP' ? 1 : 2)}>Back</FButton>
                     <FButton variant="primary" size="lg" onClick={placeOrder} style={{ flex: 1, opacity: placing ? 0.7 : 1, pointerEvents: placing ? 'none' : 'auto' }}>
-                      {placing ? 'Placing Order...' : `Place Order · ${fmt(subtotal - (couponApplied ? couponDiscount : 0))}`}
+                      {placing ? 'Placing Order...' : `Place Order · ${fmt(subtotal - (couponApplied ? couponDiscount : 0) - (loyaltyApplied ? loyaltyDiscount : 0))}`}
                     </FButton>
                   </div>
                 </div>
@@ -833,6 +888,84 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              {/* Loyalty Points Redemption */}
+              {isLoggedIn && loyaltyPoints > 0 && (
+                <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--f-border)' }}>
+                  {!loyaltyApplied ? (
+                    <div>
+                      <label style={{ fontSize: 13, fontWeight: 600, color: '#b45309', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 15 }}>&#9733;</span> Loyalty Points
+                        <span style={{ fontWeight: 400, color: 'var(--f-text-muted)', marginLeft: 'auto', fontSize: 12 }}>
+                          {loyaltyPoints.toLocaleString()} available
+                        </span>
+                      </label>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <input
+                          type="number"
+                          value={loyaltyInput}
+                          onChange={e => { setLoyaltyInput(e.target.value); setLoyaltyError('') }}
+                          placeholder="Min 100"
+                          min={100}
+                          step={1}
+                          max={loyaltyPoints}
+                          style={{
+                            flex: 1, padding: '10px 14px', borderRadius: 'var(--f-radius-md)',
+                            border: `1.5px solid ${loyaltyError ? '#ef4444' : 'rgba(245,158,11,0.4)'}`,
+                            background: 'var(--f-bg)', color: 'var(--f-text)', fontSize: 14,
+                            outline: 'none', fontWeight: 600,
+                          }}
+                        />
+                        <button
+                          onClick={applyLoyalty}
+                          disabled={loyaltyLoading || !loyaltyInput}
+                          style={{
+                            padding: '10px 18px', borderRadius: 'var(--f-radius-md)',
+                            background: '#d97706', color: '#fff', border: 'none',
+                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                            opacity: loyaltyLoading || !loyaltyInput ? 0.5 : 1,
+                            transition: 'opacity 0.2s', whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {loyaltyLoading ? '...' : 'Apply'}
+                        </button>
+                      </div>
+                      {loyaltyInput && parseInt(loyaltyInput, 10) >= 100 && (
+                        <div style={{ fontSize: 12, color: '#b45309', marginTop: 6, fontWeight: 500 }}>
+                          Discount: {fmt(Math.floor(parseInt(loyaltyInput, 10) / 100) * 10)}
+                        </div>
+                      )}
+                      {loyaltyError && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 13, color: '#ef4444', fontWeight: 500 }}>
+                          <span style={{ fontSize: 14 }}>&#10007;</span> {loyaltyError}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 14px', borderRadius: 'var(--f-radius-md)',
+                      background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ color: '#d97706', fontSize: 15, fontWeight: 700 }}>&#9733;</span>
+                        <div>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--f-text)' }}>
+                            {parseInt(loyaltyInput, 10).toLocaleString()} pts
+                          </span>
+                          <span style={{ fontSize: 12, color: '#b45309', fontWeight: 500, marginLeft: 6 }}>
+                            -{fmt(loyaltyDiscount)}
+                          </span>
+                        </div>
+                      </div>
+                      <button onClick={removeLoyalty} style={{
+                        background: 'none', border: 'none', color: 'var(--f-text-muted)',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline',
+                      }}>Remove</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>Subtotal ({cart.length} items)</span>
@@ -842,6 +975,12 @@ export default function CheckoutPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 14, color: '#27ae60' }}>Coupon ({couponCode.toUpperCase()})</span>
                     <span style={{ fontSize: 14, fontWeight: 600, color: '#27ae60' }}>-{fmt(couponDiscount)}</span>
+                  </div>
+                )}
+                {loyaltyApplied && loyaltyDiscount > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 14, color: '#b45309' }}>Loyalty ({parseInt(loyaltyInput, 10).toLocaleString()}pts)</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#b45309' }}>-{fmt(loyaltyDiscount)}</span>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -859,7 +998,7 @@ export default function CheckoutPage() {
                 paddingTop: 16, borderTop: '2px solid var(--f-border)', marginTop: 16,
               }}>
                 <span style={{ fontSize: 17, fontWeight: 800, color: 'var(--f-text)' }}>Total</span>
-                <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-aqua)' }}>{fmt(subtotal - (couponApplied ? couponDiscount : 0))}</span>
+                <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--f-aqua)' }}>{fmt(subtotal - (couponApplied ? couponDiscount : 0) - (loyaltyApplied ? loyaltyDiscount : 0))}</span>
               </div>
 
               {/* Delivery/Pickup info preview */}

@@ -3,7 +3,13 @@
     "site": "fishora-website",
     "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true,
+    "trailingSlash": false,
     "rewrites": [
+      {
+        "source": "/shop/product",
+        "destination": "/shop/product.html"
+      },
       {
         "source": "**",
         "destination": "/index.html"

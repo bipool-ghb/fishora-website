@@ -11,10 +11,25 @@ export default function AccountPage() {
   const router = useRouter()
   const { customer, token, logout, isLoggedIn, loading } = useCustomerAuth()
   const [tab, setTab] = useState('profile')
+  const [loyalty, setLoyalty] = useState(null)
 
   useEffect(() => {
     if (!loading && !isLoggedIn) router.push('/account/login')
   }, [loading, isLoggedIn, router])
+
+  // Fetch loyalty data
+  useEffect(() => {
+    if (!token) return
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/v1/customer/loyalty`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json()
+        if (data.success) setLoyalty(data.data)
+      } catch {}
+    })()
+  }, [token])
 
   if (loading) return (
     <div style={{ paddingTop: 140, textAlign: 'center', minHeight: '100vh' }}>
@@ -85,6 +100,56 @@ export default function AccountPage() {
               </span>
             )}
           </div>
+
+          {/* Loyalty Summary */}
+          {loyalty && (
+            <div style={{
+              marginTop: 12, padding: '14px 20px', borderRadius: 'var(--f-radius-lg)',
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.04))',
+              border: '1px solid rgba(245,158,11,0.25)',
+              display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
+              justifyContent: 'space-between',
+            }}>
+              <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#d97706' }}>
+                  {Number(loyalty.available_points || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-muted)', marginTop: 2 }}>
+                  Available Points
+                </div>
+              </div>
+              {loyalty.tier && (
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{
+                    padding: '4px 14px', borderRadius: 'var(--f-radius-full)',
+                    fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
+                    background: loyalty.tier === 'PLATINUM' ? 'linear-gradient(135deg, #6b7280, #9ca3af)' :
+                                loyalty.tier === 'GOLD' ? 'linear-gradient(135deg, #d97706, #f59e0b)' :
+                                'linear-gradient(135deg, #9ca3af, #d1d5db)',
+                    color: '#fff',
+                  }}>
+                    {loyalty.tier}
+                  </span>
+                </div>
+              )}
+              <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>
+                  {Number(loyalty.lifetime_earned || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-muted)', marginTop: 2 }}>
+                  Lifetime Earned
+                </div>
+              </div>
+              <div style={{ textAlign: 'center', minWidth: 80 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--f-text)' }}>
+                  {Number(loyalty.lifetime_redeemed || 0).toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--f-text-muted)', marginTop: 2 }}>
+                  Lifetime Redeemed
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
