@@ -53,7 +53,7 @@ export default function Navbar({ onCartOpen }) {
           height: 68, gap: 20,
         }}>
           {/* Logo */}
-          <Link href="/" style={{ textDecoration: 'none' }}>
+          <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
             <FishoraLogo light={isHero} />
           </Link>
 

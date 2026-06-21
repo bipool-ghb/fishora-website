@@ -170,7 +170,7 @@ export function FishoraLogo({ light = false, size = 'md' }) {
         alt="Fishora"
         style={{ height: h, width: 'auto', display: 'block', flexShrink: 0 }}
       />
-      <div style={{ display: 'flex', alignItems: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
         <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', color: light ? '#fff' : 'var(--f-text)', lineHeight: 1 }}>
           Fish
         </span>
