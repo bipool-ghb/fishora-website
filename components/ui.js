@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef, useId } from 'react'
+import Link from 'next/link'
 
 // ========== SCROLL REVEAL ==========
 export function Reveal({ children, delay = 0, direction = 'up', style = {} }) {
@@ -135,7 +136,7 @@ export function FButton({ children, variant = 'primary', size = 'md', onClick, s
     if (isExternal) {
       return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{icon}{children}</a>
     }
-    return <a href={href} {...props}>{icon}{children}</a>
+    return <Link href={href} {...props}>{icon}{children}</Link>
   }
   return <button onClick={onClick} {...props}>{icon}{children}</button>
 }
