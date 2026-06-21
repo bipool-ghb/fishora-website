@@ -24,7 +24,9 @@ export default function Navbar({ onCartOpen }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const isHome = pathname === '/'
-  const isHero = isHome && !scrolled
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  const isHero = mounted && isHome && !scrolled
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40)

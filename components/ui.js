@@ -158,26 +158,22 @@ export function StarRating({ rating, size = 14 }) {
 
 // ========== FISHORA LOGO ==========
 export function FishoraLogo({ light = false, size = 'md' }) {
-  const h = { sm: 28, md: 34, lg: 48 }[size] || 34
+  const h = { sm: 24, md: 28, lg: 40 }[size] || 28
   const s = { sm: 18, md: 22, lg: 28 }[size] || 22
   const src = light
     ? '/images/fishora_dark_background_logo.png'
     : '/images/fishora_light_background_logo.png'
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, userSelect: 'none', cursor: 'pointer', flexShrink: 0 }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, userSelect: 'none', cursor: 'pointer', flexShrink: 0, minWidth: 0 }}>
       <img
         src={src}
-        alt="Fishora"
-        style={{ height: h, width: 'auto', display: 'block', flexShrink: 0 }}
+        alt=""
+        style={{ height: h, width: 'auto', display: 'block', flexShrink: 0, maxWidth: 32 }}
       />
-      <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0, whiteSpace: 'nowrap' }}>
-        <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', color: light ? '#fff' : 'var(--f-text)', lineHeight: 1 }}>
-          Fish
-        </span>
-        <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', color: 'var(--f-aqua)', lineHeight: 1 }}>
-          ora
-        </span>
-      </div>
+      <span style={{ fontSize: s, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <span style={{ color: light ? '#fff' : '#0B1D3A' }}>Fish</span>
+        <span style={{ color: '#059669' }}>ora</span>
+      </span>
     </div>
   )
 }
