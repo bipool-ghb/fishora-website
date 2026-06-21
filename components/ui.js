@@ -131,7 +131,11 @@ export function FButton({ children, variant = 'primary', size = 'md', onClick, s
   }
 
   if (href) {
-    return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{icon}{children}</a>
+    const isExternal = href.startsWith('http') || href.startsWith('//')
+    if (isExternal) {
+      return <a href={href} target="_blank" rel="noopener noreferrer" {...props}>{icon}{children}</a>
+    }
+    return <a href={href} {...props}>{icon}{children}</a>
   }
   return <button onClick={onClick} {...props}>{icon}{children}</button>
 }
