@@ -12,7 +12,7 @@ const badgeVariants = {
 
 export default function ProductCard({ product, onAdd }) {
   const router = useRouter()
-  const { cart, updateQty, STEP, MIN_QTY } = useCart()
+  const { cart, updateQty, STEP, MIN_QTY, isPieceUnit, getStep } = useCart()
   const [hov, setHov] = useState(false)
 
   // Find this product in cart (match by variant id stored as product.id)
@@ -24,14 +24,17 @@ export default function ProductCard({ product, onAdd }) {
     onAdd && onAdd(product)
   }
 
+  const step = getStep(product.unit)
+  const unitLabel = isPieceUnit(product.unit) ? 'pc' : 'kg'
+
   const handleDecrease = (e) => {
     e.stopPropagation()
-    if (cartItem) updateQty(product.id, Math.round((cartItem.qty - STEP) / STEP) * STEP)
+    if (cartItem) updateQty(product.id, Math.round((cartItem.qty - step) / step) * step)
   }
 
   const handleIncrease = (e) => {
     e.stopPropagation()
-    if (cartItem) updateQty(product.id, Math.round((cartItem.qty + STEP) / STEP) * STEP)
+    if (cartItem) updateQty(product.id, Math.round((cartItem.qty + step) / step) * step)
   }
 
   return (
@@ -103,7 +106,7 @@ export default function ProductCard({ product, onAdd }) {
               <span style={{
                 minWidth: 48, textAlign: 'center', fontSize: 13, fontWeight: 800,
                 color: 'var(--f-aqua)', padding: '0 2px',
-              }}>{cartItem.qty} kg</span>
+              }}>{cartItem.qty} {unitLabel}</span>
               <button onClick={handleIncrease} style={{
                 width: 34, height: 34, background: 'rgba(0,150,136,0.08)', border: 'none',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',

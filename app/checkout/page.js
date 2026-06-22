@@ -809,7 +809,7 @@ export default function CheckoutPage() {
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: 13, color: 'var(--f-text-muted)' }}>
-                            {fmt(product.price)}/kg x {qty} kg
+                            {fmt(product.price)}/{product.unit === 'piece' || product.unit === 'pc' || product.unit === 'pcs' || product.unit === 'dozen' ? 'pc' : 'kg'} x {qty} {product.unit === 'piece' || product.unit === 'pc' || product.unit === 'pcs' || product.unit === 'dozen' ? 'pc' : 'kg'}
                           </span>
                           <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--f-text)' }}>
                             {fmt(product.price * qty)}

@@ -6,9 +6,28 @@ const CartContext = createContext(null)
 const STEP = 0.25
 const MIN_QTY = 0.25
 
-// Round to nearest 0.25 to avoid floating point issues
+const PIECE_UNITS = ['piece', 'pc', 'pcs', 'dozen', 'pack', 'box', 'set']
+
+function isPieceUnit(unit) {
+  return PIECE_UNITS.includes((unit || '').toLowerCase())
+}
+
+function getStep(unit) {
+  return isPieceUnit(unit) ? 1 : STEP
+}
+
+function getMinQty(unit) {
+  return isPieceUnit(unit) ? 1 : MIN_QTY
+}
+
+// Round to nearest step to avoid floating point issues
 function roundQty(n) {
   return Math.round(n / STEP) * STEP
+}
+
+function roundQtyForUnit(n, unit) {
+  const step = getStep(unit)
+  return Math.round(n / step) * step
 }
 
 function getItemId(item) {
@@ -79,8 +98,13 @@ export function CartProvider({ children }) {
       setCart(prev => prev.map(i => getItemId(i) === id ? { ...i, qty: q } : i))
       return
     }
-    const q = roundQty(qty)
-    if (q < MIN_QTY) return removeItem(id)
+    // Find item to get its unit
+    const item = cart.find(i => i.product?.id === id)
+    const unit = item?.product?.unit || 'kg'
+    const step = getStep(unit)
+    const min = getMinQty(unit)
+    const q = Math.round(qty / step) * step
+    if (q < min) return removeItem(id)
     setCart(prev => prev.map(i => (i.product?.id === id) ? { ...i, qty: q } : i))
   }
 
@@ -100,7 +124,7 @@ export function CartProvider({ children }) {
   }, 0)
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, updateQty, removeItem, clearCart, cartCount, subtotal, STEP, MIN_QTY, appliedOffer, applyOffer, clearOffer, getItemId }}>
+    <CartContext.Provider value={{ cart, addToCart, updateQty, removeItem, clearCart, cartCount, subtotal, STEP, MIN_QTY, appliedOffer, applyOffer, clearOffer, getItemId, isPieceUnit, getStep, getMinQty }}>
       {children}
     </CartContext.Provider>
   )

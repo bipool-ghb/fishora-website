@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081'
 
 export default function CartDrawer({ open, onClose }) {
-  const { cart, updateQty, removeItem, subtotal, STEP, MIN_QTY, appliedOffer, clearOffer, getItemId } = useCart()
+  const { cart, updateQty, removeItem, subtotal, STEP, MIN_QTY, appliedOffer, clearOffer, getItemId, isPieceUnit, getStep } = useCart()
   const { token } = useCustomerAuth()
   const router = useRouter()
   const [discount, setDiscount] = useState(0)
@@ -178,12 +178,12 @@ export default function CartDrawer({ open, onClose }) {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderRadius: 'var(--f-radius-full)', border: '1px solid var(--f-border)', overflow: 'hidden' }}>
-                          <button onClick={() => updateQty(product.id, Math.round((qty - STEP) / STEP) * STEP)} style={{
+                          <button onClick={() => { const s = getStep(product.unit); updateQty(product.id, Math.round((qty - s) / s) * s); }} style={{
                             width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}><FIcon name="minus" size={14} color="var(--f-text)" /></button>
-                          <span style={{ minWidth: 44, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--f-text)' }}>{qty} kg</span>
-                          <button onClick={() => updateQty(product.id, Math.round((qty + STEP) / STEP) * STEP)} style={{
+                          <span style={{ minWidth: 44, textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--f-text)' }}>{qty} {isPieceUnit(product.unit) ? 'pc' : 'kg'}</span>
+                          <button onClick={() => { const s = getStep(product.unit); updateQty(product.id, Math.round((qty + s) / s) * s); }} style={{
                             width: 32, height: 32, background: 'var(--f-bg-alt)', border: 'none', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                           }}><FIcon name="plus" size={14} color="var(--f-text)" /></button>
