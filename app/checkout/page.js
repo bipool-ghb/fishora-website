@@ -987,8 +987,8 @@ export default function CheckoutPage() {
                   <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>
                     {fulfillmentType === 'PICKUP' ? 'Pickup' : 'Delivery'}
                   </span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--f-aqua)' }}>
-                    {fulfillmentType === 'PICKUP' ? 'Store Pickup' : 'Free'}
+                  <span style={{ fontSize: 14, fontWeight: 600, color: fulfillmentType === 'PICKUP' ? 'var(--f-aqua)' : 'var(--f-text-muted)' }}>
+                    {fulfillmentType === 'PICKUP' ? 'Store Pickup' : 'Pending'}
                   </span>
                 </div>
               </div>

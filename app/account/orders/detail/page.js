@@ -354,8 +354,17 @@ function OrderDetailContent() {
                 <span style={{ fontSize: 14, color: 'var(--f-text-muted)' }}>
                   {order.fulfillment_type === 'PICKUP' ? 'Pickup' : 'Delivery'}
                 </span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: deliveryFee > 0 ? 'var(--f-text)' : 'var(--f-aqua)' }}>
-                  {order.fulfillment_type === 'PICKUP' ? 'Store Pickup' : (deliveryFee > 0 ? fmt(deliveryFee) : 'Free')}
+                <span style={{
+                  fontSize: 14, fontWeight: 600,
+                  color: order.fulfillment_type === 'PICKUP' ? 'var(--f-aqua)'
+                    : order.delivery_fee_status === 'PENDING' ? '#ca8a04'
+                    : deliveryFee > 0 ? 'var(--f-text)' : 'var(--f-aqua)',
+                }}>
+                  {order.fulfillment_type === 'PICKUP'
+                    ? 'Store Pickup'
+                    : order.delivery_fee_status === 'PENDING'
+                      ? 'Pending'
+                      : (deliveryFee > 0 ? fmt(deliveryFee) : 'Free')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '2px solid var(--f-border)' }}>
