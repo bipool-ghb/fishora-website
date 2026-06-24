@@ -44,6 +44,7 @@ export default function AccountPage() {
   const tabs = [
     { id: 'profile', label: 'Profile' },
     { id: 'orders', label: 'Orders' },
+    { id: 'subscriptions', label: 'Subscriptions', href: '/account/subscriptions' },
     { id: 'password', label: 'Password' },
     { id: 'addresses', label: 'Addresses' },
     { id: 'phones', label: 'Phones' },
@@ -154,7 +155,18 @@ export default function AccountPage() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, marginBottom: 28, flexWrap: 'wrap', borderBottom: '1px solid var(--f-border)', paddingBottom: 0 }}>
-          {tabs.map(t => (
+          {tabs.map(t => t.href ? (
+            <Link key={t.id} href={t.href} style={{
+              padding: '10px 20px', fontSize: 14, fontWeight: 600,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--f-text-muted)',
+              borderBottom: '2px solid transparent',
+              transition: 'all 0.2s ease', marginBottom: -1,
+              textDecoration: 'none',
+            }}>
+              {t.label}
+            </Link>
+          ) : (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               padding: '10px 20px', fontSize: 14, fontWeight: 600,
               background: 'none', border: 'none', cursor: 'pointer',
